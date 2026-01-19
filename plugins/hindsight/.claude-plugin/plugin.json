@@ -1,0 +1,9 @@
+{
+  "name": "hindsight",
+  "version": "1.0.0",
+  "description": "Integration with Hindsight memory bank for storing and retrieving development decisions across sessions",
+  "author": {
+    "name": "Dmitriy Nenashev"
+  },
+  "keywords": ["memory", "hindsight", "decisions", "knowledge-base", "ai-memory"]
+}

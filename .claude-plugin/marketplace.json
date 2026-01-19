@@ -1,0 +1,16 @@
+{
+  "name": "hindsight-marketplace",
+  "owner": {
+    "name": "Dmitriy Nenashev"
+  },
+  "metadata": {
+    "description": "Hindsight memory bank integration for Claude Code"
+  },
+  "plugins": [
+    {
+      "name": "hindsight",
+      "source": "./plugins/hindsight",
+      "description": "Integration with Hindsight memory bank for storing and retrieving development decisions across sessions"
+    }
+  ]
+}
