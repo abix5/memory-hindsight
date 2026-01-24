@@ -132,49 +132,31 @@ Use reflection when:
 3. **Cross-reference with current context**
    - Memory might be outdated; verify relevance
 
-## Proactive Suggestions
-
-When `auto_suggest_retain: true` in settings, suggest storing:
-
-1. After significant technical discussions conclude
-2. When explicit decisions are made
-3. When bugs are solved after substantial debugging
-4. When the user expresses strong opinions about approaches
-
-Format suggestions as:
-> "This seems like an important decision. Should I save it to memory?"
-> Content: [summary]
-> Category: [suggested category]
-
-## Configuration
-
-Settings are stored in `.claude/hindsight.json`:
-
-```yaml
-bank_id: "project-name"      # Memory bank identifier
-api_url: "http://localhost:8888"  # Hindsight server
-default_context: "decisions"  # Default category
-auto_suggest_retain: true     # Proactive suggestions
-```
-
-## CLI Reference
+## Plugin Commands
 
 ```bash
-# Store memory
-hindsight memory retain <bank_id> "<content>" --context <category>
+# Initialize memory bank for project
+/hindsight:init [bank_id]
+
+# Store memory (bank_id auto-detected)
+/hindsight:retain "<content>" --context <category>
 
 # Search memory
-hindsight memory recall <bank_id> "<query>" --budget <low|mid|high>
+/hindsight:recall "<query>" --budget <low|mid|high>
 
-# Get analysis
-hindsight memory reflect <bank_id> "<question>" --budget <low|mid|high>
-
-# List banks
-hindsight bank list
-
-# Bank statistics
-hindsight bank stats <bank_id>
+# Get AI analysis
+/hindsight:reflect "<question>" --budget <low|mid|high>
 ```
+
+## Bank ID Resolution
+
+The plugin automatically determines bank_id:
+
+1. From `.claude/hindsight.json` (if exists)
+2. From git remote origin (user/repo → user-repo)
+3. From current directory name (fallback)
+
+You don't need to specify bank_id manually - it's handled automatically.
 
 ## Reference Documentation
 
@@ -182,8 +164,7 @@ For complete CLI command reference with all options and examples, see:
 - `references/cli-commands.md` - Complete hindsight CLI reference
 
 **Important CLI Notes:**
-- No `hindsight bank create` command - banks auto-create when you use `name` or `background`
-- No `hindsight bank info` command - use `disposition` or `stats` instead
+- Banks auto-create when you use `name` or `background` commands
 - Budget levels: `low` (quick), `mid` (default, balanced), `high` (thorough)
 - All commands support `--output json` for programmatic use
 - Use `--verbose` flag for debugging API calls

@@ -4,29 +4,31 @@ allowed-tools: ["Bash"]
 argument-hint: "<query> [--budget <low|mid|high>]"
 ---
 
-## Hindsight Memory Recall Results
+## Search Memory
 
-Bank ID: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh 2>&1`
+Bank ID: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh`
 
-Search results:
-!`BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh 2>&1) && if [[ "$BANK_ID" == ERROR* ]]; then echo "$BANK_ID"; exit 1; fi && hindsight memory recall "$BANK_ID" $ARGUMENTS`
+Results:
+!`set -f && BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh) && hindsight memory recall "$BANK_ID" "$ARGUMENTS" 2>&1`
 
 ---
 
-## Your Task
+## Instructions
 
-Analyze the search results above from the Hindsight memory bank and:
+Analyze the search results and present them clearly:
 
-1. **Summarize findings**: Present the key information that matches the query
-2. **Extract relevant details**: Highlight important decisions, reasoning, and context
-3. **Identify patterns**: If multiple related memories exist, show connections
-4. **Provide context**: Explain how this information relates to the current project
+1. **Summarize findings**: Key information matching the query
+2. **Extract details**: Important decisions, reasoning, context
+3. **Show connections**: If multiple related memories, highlight patterns
+4. **Provide context**: How this relates to current work
 
-If no results were found, suggest:
-- Refining the search query
-- Using different keywords
-- Checking if the information was stored with a different context
+**Budget levels:**
+- `low` - Quick lookup, recent/obvious info
+- `mid` - Balanced search (default)
+- `high` - Comprehensive, thorough analysis
 
-**Search parameters:**
-- Query: $ARGUMENTS
-- Budget: Automatically determined or specified by user
+If no results found, suggest:
+- Try different keywords
+- Use broader or narrower query
+- Check if information was stored with different context
+- Consider using `/hindsight:reflect` for analysis-based answers

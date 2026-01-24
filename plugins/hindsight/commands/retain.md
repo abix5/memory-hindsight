@@ -4,32 +4,36 @@ allowed-tools: ["Bash"]
 argument-hint: "<content> [--context <category>]"
 ---
 
-## Hindsight Memory Retain
+## Store Memory
 
-Bank ID: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh 2>&1`
+Bank ID: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh`
 
-Store operation:
-!`BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh 2>&1) && if [[ "$BANK_ID" == ERROR* ]]; then echo "$BANK_ID"; exit 1; fi && hindsight memory retain "$BANK_ID" $ARGUMENTS`
+Result:
+!`set -f && BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh) && hindsight memory retain "$BANK_ID" "$ARGUMENTS" 2>&1`
 
 ---
 
-## Your Task
+## Instructions
 
-The information has been stored in the Hindsight memory bank. Confirm to the user:
+Confirm to the user:
 
-1. **What was stored**: Briefly summarize the content
-2. **Category used**: Mention which context/category was applied
-3. **Future retrieval**: Suggest how this can be recalled later (keywords to use)
+1. **What was stored**: Summarize the content briefly
+2. **Category**: Which context/category was applied (default: general)
+3. **Bank**: Mention which bank it was stored in
+4. **Retrieval hint**: Suggest keywords for future recall
 
-**Available categories:**
-- `architecture` - Architectural decisions, project structure
+**Categories for --context flag:**
+- `architecture` - System design, component structure
 - `tech-stack` - Technology and library choices
 - `patterns` - Code patterns and approaches
 - `decisions` - Important decisions with reasoning
-- `tradeoffs` - Compromises and their justification
-- `bugs` - Complex bugs and their solutions
-- `lessons` - Learned lessons, insights
-- `requirements` - Business requirements and constraints
-- `conventions` - Code and process conventions
+- `tradeoffs` - Compromises and justification
+- `bugs` - Complex bugs and solutions
+- `lessons` - Insights and learnings
+- `requirements` - Business constraints
+- `conventions` - Code and process standards
 
-If the operation failed, explain the error and suggest how to fix it.
+If the operation failed, explain the error and suggest:
+- Check if Hindsight server is running
+- Verify the content is not empty
+- Try `/hindsight:init` if bank doesn't exist

@@ -2,19 +2,7 @@
 
 ## Quick Start
 
-### 1. Install the Plugin
-
-The plugin should be installed via the Claude Code marketplace:
-
-```bash
-# Add the local marketplace
-/plugin marketplace add /Users/dmitriynenashev/.claude/plugins/hindsight-marketplace
-
-# Install the plugin
-/plugin install hindsight
-```
-
-### 2. Initialize for Your Project
+### 1. Initialize for Your Project
 
 Navigate to your project directory and run:
 
@@ -26,7 +14,7 @@ This will:
 - Auto-detect a bank_id from git remote or directory name
 - Create or connect to the memory bank
 - Generate `.claude/hindsight.json` settings file
-- Add `.claude/*.local.md` to `.gitignore`
+- Add settings to `.gitignore`
 
 You can also specify a custom bank ID:
 
@@ -34,7 +22,7 @@ You can also specify a custom bank ID:
 /hindsight:init my-custom-bank-id
 ```
 
-### 3. Store Important Decisions
+### 2. Store Important Decisions
 
 Use `/hindsight:retain` to save decisions, discoveries, or lessons:
 
@@ -57,7 +45,7 @@ Use `/hindsight:retain` to save decisions, discoveries, or lessons:
 - `requirements` - Business constraints
 - `conventions` - Coding standards
 
-### 4. Search Past Decisions
+### 3. Search Past Decisions
 
 Use `/hindsight:recall` to search the memory bank:
 
@@ -74,7 +62,7 @@ Use `/hindsight:recall` to search the memory bank:
 - `mid` - Balanced (default)
 - `high` - Thorough, comprehensive
 
-### 5. Get AI Analysis
+### 4. Get AI Analysis
 
 Use `/hindsight:reflect` for recommendations based on stored context:
 
@@ -90,19 +78,17 @@ Use `/hindsight:reflect` for recommendations based on stored context:
 
 All commands use **bash execution** to directly call the `hindsight` CLI:
 
-```markdown
-# In the command file:
-!`hindsight memory recall "$BANK_ID" "$QUERY"`
-```
-
-1. **Configuration loading**: Scripts read `.claude/hindsight.json` to extract `bank_id`
+1. **Bank ID resolution**: Scripts automatically determine bank_id from:
+   - `.claude/hindsight.json` (if exists)
+   - Git remote origin (user/repo → user-repo)
+   - Current directory name (fallback)
 2. **CLI execution**: Commands run `hindsight` CLI with proper arguments
 3. **Result interpretation**: Claude receives the output and formats it for you
 
 This approach provides:
 - Direct access to Hindsight without abstractions
 - Real-time results from the memory bank
-- Automatic configuration from project settings
+- Automatic configuration - no manual bank_id input needed
 - Smart interpretation by Claude
 
 ## Settings File
@@ -119,9 +105,7 @@ Created automatically by `/hindsight:init` at `.claude/hindsight.json`:
 
 **Important**: This file is git-ignored by default.
 
-## Advanced Features
-
-### Memory Keeper Agent
+## Memory Keeper Agent
 
 The plugin includes a specialized agent that proactively identifies important decisions:
 
@@ -131,19 +115,6 @@ The plugin includes a specialized agent that proactively identifies important de
 - Formulates memories with proper context
 
 Claude may suggest: "This seems like an important decision. Should I store it in memory?"
-
-### Stop Hook
-
-At the end of each session, the plugin reviews the conversation and suggests storing any important decisions that weren't already saved.
-
-### MCP Integration
-
-The plugin also configures direct MCP tool access for advanced use cases:
-- `mcp__hindsight__retain` - Store memories
-- `mcp__hindsight__recall` - Search memories
-- `mcp__hindsight__reflect` - Get analysis
-- `mcp__hindsight__list_banks` - List available banks
-- `mcp__hindsight__create_bank` - Create new banks
 
 ## Troubleshooting
 
@@ -219,8 +190,6 @@ Settings file is git-ignored, so each developer can use different API URLs if ne
 4. **Reflect before deciding**: Check existing context before making new decisions
    - `/hindsight:reflect` before implementing new features
    - Helps maintain consistency with past choices
-
-5. **Review at session end**: The Stop hook will remind you to save important decisions
 
 ## Further Reading
 

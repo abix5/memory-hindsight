@@ -1,12 +1,34 @@
 {
   "hooks": {
-    "Stop": [
+    "SessionStart": [
       {
-        "matcher": "",
+        "matcher": "*",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Before ending, check if the conversation contained any important decisions, architectural choices, bug solutions, or lessons learned that should be stored in the Hindsight memory bank. Review the conversation for: 1) Technology or library choices with reasoning 2) Architectural decisions 3) Complex bugs that were solved 4) Tradeoffs that were discussed 5) Important lessons or insights. If you find anything worth storing: 1) Read .claude/hindsight.json to get the bank_id 2) Suggest to the user: 'I noticed some important decisions in our conversation. Should I save them to the memory bank?' 3) List what you would store with suggested categories 4) Only proceed with storage if the user confirms. If nothing significant was discussed or decisions were already stored, proceed with ending the session normally."
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/smart-recall.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze-decision.sh"
           }
         ]
       }

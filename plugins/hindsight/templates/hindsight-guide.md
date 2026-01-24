@@ -177,7 +177,7 @@ When you make an important decision, store it immediately:
 
 ### End of session
 
-Claude will remind you to save important decisions before ending the session (via Stop hook).
+Review the session and use `/hindsight:retain` to save any important decisions before ending.
 
 ### Team collaboration
 
