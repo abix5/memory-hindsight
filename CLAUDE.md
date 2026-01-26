@@ -224,9 +224,6 @@ allowed-tools: Bash(git:commit, git:push)
 
 # Несколько инструментов
 allowed-tools: ["Read", "Write", "Bash(git:*)"]
-
-# Все инструменты (по умолчанию, если не указано)
-# (любой инструмент может быть использован)
 ```
 
 **Спецификация команд:**
@@ -389,91 +386,6 @@ plugins/my-plugin/commands/
 - Plugin commands: `/plugin-name:command-name`
 - Полное имя плагина для ясности
 
-#### Продвинутые паттерны
-
-**Multi-script workflow:**
-
-```markdown
----
-description: Complete build and test workflow
-allowed-tools: Bash(*)
----
-
-Build: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/build.sh`
-Validate: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh`
-Test: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/test.sh`
-
-Review all outputs and report:
-1. Build status
-2. Validation results
-3. Test results
-4. Recommended next steps
-```
-
-**Command chaining:**
-
-```markdown
----
-description: Prepare for code review
----
-
-# Prepare Code Review
-
-Running preparation sequence:
-
-1. Format code: /format-code
-2. Run linter: /lint-code
-3. Run tests: /test-all
-4. Generate coverage: /coverage-report
-5. Create review summary: /review-summary
-
-This is a meta-command. After completing each step above,
-compile results and prepare comprehensive review materials.
-
-Starting sequence...
-```
-
-**Interactive commands with AskUserQuestion:**
-
-```markdown
----
-description: Interactive project setup
-allowed-tools: AskUserQuestion, Write, Bash
----
-
-# Project Setup
-
-## Stage 1: Basic Configuration
-
-Use AskUserQuestion to gather:
-
-**Question 1:** Which programming language?
-- Python (Flexible, great for scripts)
-- TypeScript (Type-safe, scalable)
-- Go (Fast, efficient)
-- Rust (Performance, memory safety)
-
-**Question 2:** Which test framework?
-[Adapt based on language selection]
-
-## Stage 2: Advanced Options (Conditional)
-
-If user selected "Advanced" in Stage 1:
-Ask about load balancing, caching, security
-
-If "Simple":
-Use sensible defaults
-
-## Stage 3: Confirmation
-
-Show summary of all selections.
-
-Use AskUserQuestion for final confirmation:
-- Yes (Proceed with setup)
-- No (Start over)
-- Modify (Adjust specific settings)
-```
-
 #### Best Practices для команд
 
 **✅ Do:**
@@ -483,7 +395,6 @@ Use AskUserQuestion for final confirmation:
 - Предоставляйте清晰的 следующий шаги
 - Используйте bash execution для получения данных
 - Валидируйте входные аргументы
-- Показывайте progress для длительных операций
 
 **❌ Don't:**
 - Не включайте `name` в frontmatter
@@ -491,7 +402,6 @@ Use AskUserQuestion for final confirmation:
 - Не используйте hardcoded paths
 - Не разрешайте все инструменты без необходимости
 - Не оставляйте пользователя без clear next steps
-- Не злоупотребляйте bash execution (может быть медленным)
 
 #### Когда использовать Commands vs Agents vs Skills
 
@@ -500,68 +410,6 @@ Use AskUserQuestion for final confirmation:
 | **Command** | Пользователь явно вызывает действие | `/deploy`, `/test`, `/review` |
 | **Agent** | Автономная многошаговая задача | Анализ кода, генерация документации |
 | **Skill** | Справочная информация | Best practices, API reference |
-
-**Пример:**
-
-```markdown
-# ❌ ПЛОХО - Command для сложной задачи
----
-description: Analyze entire codebase and suggest improvements
----
-
-# Это должен быть Agent!
-
-# ✅ ХОРОШО - Command для простого действия
----
-description: Run tests and show results
----
-
-!`npm test`
-
-Analyze results and provide summary.
-```
-
-#### Performance и оптимизация
-
-**Bash execution порядок:**
-```markdown
-# Bash выполняется ДО того как Claude видит промпт
-
----
-description: Get git status
----
-
-Current branch: !`git branch --show-current`
-Status: !`git status --short`
-
-# Claude видит уже выполненные команды и их вывод
-```
-
-**Кэширование результатов:**
-```markdown
-# Для дорогостоящих операций
----
-description: Analyze code complexity
-allowed-tools: Bash, Read
----
-
-Check if analysis exists:
-!`test -f .claude/complexity-cache.json && echo "cached" || echo "not-cached"`
-
-If cached: @.claude/complexity-cache.json
-If not: Run analysis and cache results
-```
-
-**Минимизация bash вызовов:**
-```markdown
-# ❌ ПЛОХО - множественные вызовы
-!`git status`
-!`git log --oneline -5`
-!`git diff --stat`
-
-# ✅ ХОРОШО - один вызов
-!`bash ${CLAUDE_PLUGIN_ROOT}/scripts/git-info.sh`
-```
 
 #### Troubleshooting
 
@@ -576,17 +424,11 @@ If not: Run analysis and cache results
 - Убедитесь что используете `!`command`` синтаксис
 - Проверьте права на исполнение скриптов: `chmod +x`
 
-**Аргументы не передаются:**
-- Используйте `$1`, `$2` для позиционных аргументов
-- Используйте `$ARGUMENTS` для всех аргументов
-- Проверьте `argument-hint` в frontmatter
-
 **Важно:**
 - ❌ **НЕ включать** поле `name` в frontmatter - имя берётся из названия файла
 - ✅ Команды должны **инструктировать Claude**, а не пользователя
 - ✅ Bash execution выполняется **до** того как Claude видит промпт
 - ✅ Всегда использовать `${CLAUDE_PLUGIN_ROOT}` для путей к скриптам
-- ✅ Используйте третий лицо в описаниях для `/help`
 
 ### Agents
 
@@ -796,30 +638,6 @@ skill-name/
 }
 ```
 
-**UserPromptSubmit:**
-```json
-{
-  "user_prompt": "текст запроса пользователя"
-}
-```
-
-**Stop:**
-```json
-{
-  "reason": "причина остановки"
-}
-```
-
-**SubagentStop:**
-```json
-{
-  "agent_name": "имя агента",
-  "result": {
-    // результат работы агента
-  }
-}
-```
-
 **Доступ к input в prompts:**
 - `$TOOL_NAME` - имя инструмента
 - `$TOOL_INPUT` - параметры инструмента (JSON)
@@ -880,23 +698,6 @@ skill-name/
 - Принятие решений на основе анализа
 - Валидация которая требует интерпретации
 
-**Пример:**
-```json
-{
-  "PreToolUse": [
-    {
-      "matcher": "Write|Edit",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "File path: $TOOL_INPUT.file_path. Verify: 1) Not in /etc or system directories 2) Not .env or credentials 3) Path doesn't contain '..' traversal. Return 'approve' or 'deny'."
-        }
-      ]
-    }
-  ]
-}
-```
-
 **2. Command-based hooks:**
 
 ```json
@@ -911,23 +712,6 @@ skill-name/
 - Быстрые проверки без сложной логики
 - Интеграция с внешними инструментами
 
-**Пример скрипта:**
-```bash
-#!/bin/bash
-set -euo pipefail
-
-input=$(cat)
-tool_name=$(echo "$input" | jq -r '.tool_name')
-
-# Валидация
-if [[ ! "$tool_name" =~ ^[a-zA-Z0-9_]+$ ]]; then
-  echo '{"decision": "deny", "reason": "Invalid tool name"}' >&2
-  exit 2
-fi
-
-exit 0
-```
-
 **Exit codes для command hooks:**
 - `0` - Allow operation
 - `1` - Show stderr to user, continue
@@ -941,13 +725,6 @@ exit 0
 "Write"          // Конкретный инструмент
 "Write|Edit"     // Несколько инструментов (regex)
 "Bash(git:*)"    // Bash команды с префиксом git
-```
-
-**Advanced patterns:**
-```json
-"Write.*\.(js|ts)"  // Write инструментов с определенными расширениями
-"Bash(rm|mv|cp)"   // Конкретные bash команды
-"(Read|Write).*\.env"  // Read или Write для .env файлов
 ```
 
 **Правила:**
@@ -988,15 +765,6 @@ exit 0
 }
 ```
 
-**Output на stdout для command hooks:**
-```bash
-# JSON output на stdout
-echo '{"continue": true, "systemMessage": "✅ OK"}'
-
-# Или просто status message
-echo "✅ Validation passed"
-```
-
 #### Hook Execution Order
 
 **Порядок выполнения:**
@@ -1008,199 +776,29 @@ echo "✅ Validation passed"
 - Hooks из плагинов выполняются в алфавитном порядке имени плагина
 - Project hooks (`.claude/hooks.json`) выполняются после plugin hooks
 
-**Chaining hooks:**
-```json
-{
-  "PreToolUse": [
-    {
-      "matcher": "Write",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/step1-validate.sh"
-        },
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/step2-check.sh"
-        }
-      ]
-    }
-  ]
-}
-```
+#### Best Practices Summary
 
-#### Advanced Hook Patterns
+**Security:**
+- Всегда валидируйте input в command hooks
+- Проверяйте пути на traversal (..) и системные директории
+- Используйте prompt hooks для сложной логики
 
-**Security validation pattern:**
-```json
-{
-  "PreToolUse": [
-    {
-      "matcher": "Bash",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Validate bash command: $TOOL_INPUT.command\n\nCheck for:\n- Dangerous commands (rm -rf /, dd, etc)\n- Command injection attempts\n- Unsafe flags\n\nReturn 'allow', 'deny', or 'warn' with explanation."
-        }
-      ]
-    }
-  ]
-}
-```
+**Performance:**
+- Command hooks для быстрых проверок
+- Prompt hooks для сложной логики
+- Hook timeouts: PreToolUse 5s, PostToolUse 2s, Stop 3s
 
-**Multi-layer protection:**
-```json
-{
-  "PreToolUse": [
-    {
-      "matcher": "Write|Edit",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/quick-check.sh"
-        },
-        {
-          "type": "prompt",
-          "prompt": "Additional validation: is this file write safe?"
-        }
-      ]
-    }
-  ]
-}
-```
-
-**Context loading:**
-```json
-{
-  "SessionStart": [
-    {
-      "matcher": "*",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/load-context.sh"
-        }
-      ]
-    }
-  ]
-}
-```
-
-#### Best Practices для Hooks
-
-**✅ Do:**
-- Используйте prompt-based hooks для сложной логики
-- Валидируйте input в command hooks
-- Используйте `${CLAUDE_PLUGIN_ROOT}` для portable paths
-- Предоставляйте clear error messages
-- Тестируйте hooks перед релизом
-- Документируйте сложные patterns в README
-- Используйте timeouts для долгих операций
-- Обрабатывайте ошибки gracefully
-
-**❌ Don't:**
-- Не полагайтесь на порядок выполнения hooks
-- Не блокируйте без clear reason
-- Не используйте hardcoded paths
-- Не злоупотребляйте "*" matcher
-- Не забывайте про exit codes в command hooks
-- Не делайте hooks слишком сложными
-
-#### Security Best Practices
-
-**Input validation:**
+**Testing:**
 ```bash
-#!/bin/bash
-input=$(cat)
-tool_name=$(echo "$input" | jq -r '.tool_name')
+# Unit test
+echo '{"tool_name": "Write"}' | bash hooks/validate.sh
 
-# Всегда валидируйте input
-if [[ ! "$tool_name" =~ ^[a-zA-Z0-9_]+$ ]]; then
-  echo '{"decision": "deny", "reason": "Invalid tool name"}' >&2
-  exit 2
-fi
-```
-
-**Path validation:**
-```json
-{
-  "type": "prompt",
-  "prompt": "Validate path: $TOOL_INPUT.file_path\n\nCheck:\n1. No path traversal (..)\n2. Not in system directories (/etc, /sys, /proc)\n3. Not credential files (.env, credentials)\n\nReturn 'allow' or 'deny'."
-}
-```
-
-**Command sanitization:**
-```bash
-# Санитизируйте команды перед выполнением
-sanitize_command() {
-  local cmd="$1"
-  # Remove dangerous flags
-  cmd="${cmd//--rf/}"
-  cmd="${cmd//-f/}"
-  echo "$cmd"
-}
-```
-
-#### Performance Considerations
-
-**Optimization tips:**
-- Используйте command hooks для быстрых проверок
-- Prompt hooks только для сложной логики
-- Кэшируйте результаты где возможно
-- Избегайте долгих операций в hooks
-- Используйте timeouts для внешних вызовов
-
-**Hook timeouts:**
-- PreToolUse: 5s default
-- PostToolUse: 2s default
-- Stop: 3s default
-- Other events: 1s default
-
-#### Testing Hooks
-
-**Unit testing:**
-```bash
-# Тест с mock input
-echo '{"tool_name": "Write", "tool_input": {...}}' | \
-  bash hooks/validate.sh
-```
-
-**Integration testing:**
-```bash
-# Тест в реальном окружении
+# Integration test
 cc --plugin-dir /path/to/plugin
 
-# Выполните действие которое триггерит hook
-# Проверьте результат
-```
-
-**Validation:**
-```bash
-# Валидация JSON схемы
-./validate-hook-schema.sh hooks/hooks.json
-
-# Проверка синтаксиса
+# Validation
 jq . hooks/hooks.json
 ```
-
-#### Troubleshooting
-
-**Hook не срабатывает:**
-- Проверьте структуру `{"hooks": {...}}`
-- Убедитесь что event name корректен
-- Проверьте matcher pattern
-- Посмотрите логи Claude Code
-
-**Command hook fails:**
-- Проверьте executable rights: `chmod +x`
-- Убедитесь что используете正确的 exit codes
-- Проверьте stderr output
-- Протестируйте standalone
-
-**Prompt hook не работает:**
-- Проверьте переменные в prompt ($TOOL_INPUT, etc)
-- Убедитесь что prompt instructions ясны
-- Протестируйте с простыми cases
 
 **Критически важно:**
 - ✅ Корневой ключ ДОЛЖЕН быть `"hooks"`
@@ -1250,323 +848,6 @@ jq . hooks/hooks.json
 - ✅ Документируйте требуемые переменные в README
 - ✅ Используйте HTTPS для production
 - ❌ НЕ храните credentials в конфиге
-
----
-
-## 📚 Plugin Reference
-
-### Plugin Manifest (plugin.json) - Полный Reference
-
-**Расположение:** `.claude-plugin/plugin.json`
-
-**Обязательные поля:**
-```json
-{
-  "name": "plugin-name"
-}
-```
-
-**Рекомендуемые поля:**
-```json
-{
-  "name": "plugin-name",
-  "version": "1.0.0",
-  "description": "Brief explanation of plugin purpose",
-  "author": {
-    "name": "Author Name",
-    "email": "author@example.com",
-    "url": "https://example.com"
-  },
-  "homepage": "https://docs.example.com",
-  "repository": "https://github.com/user/plugin-name",
-  "license": "MIT",
-  "keywords": ["keyword1", "keyword2"]
-}
-```
-
-**Опциональные пути к компонентам:**
-```json
-{
-  "name": "plugin-name",
-  "version": "2.3.1",
-  "description": "Comprehensive plugin description",
-  "commands": ["./commands", "./admin-commands"],
-  "agents": "./specialized-agents",
-  "hooks": "./config/hooks.json",
-  "mcpServers": "./.mcp.json"
-}
-```
-
-**Полная спецификация полей:**
-
-| Поле | Тип | Обязательное | Описание |
-|------|-----|-------------|----------|
-| `name` | string | ✅ | Имя плагина (kebab-case) |
-| `version` | string | ❌ | Semantic versioning (MAJOR.MINOR.PATCH) |
-| `description` | string | ❌ | Краткое описание |
-| `author` | object | ❌ | Информация об авторе |
-| `author.name` | string | ❌ | Имя автора |
-| `author.email` | string | ❌ | Email автора |
-| `author.url` | string | ❌ | URL автора |
-| `homepage` | string | ❌ | Homepage URL |
-| `repository` | string/object | ❌ | Репозиторий |
-| `repository.type` | string | ❌ | Тип (git) |
-| `repository.url` | string | ❌ | URL репозитория |
-| `license` | string | ❌ | Лицензия (MIT, Apache-2.0, etc) |
-| `keywords` | array | ❌ | Ключевые слова для поиска |
-| `commands` | array/string | ❌ | Путь к commands директории |
-| `agents` | string | ❌ | Путь к agents директории |
-| `hooks` | string | ❌ | Путь к hooks.json |
-| `mcpServers` | string | ❌ | Путь к .mcp.json |
-
-**Пример полного manifest:**
-```json
-{
-  "name": "enterprise-devops",
-  "version": "2.3.1",
-  "description": "Comprehensive DevOps automation for enterprise CI/CD pipelines",
-  "author": {
-    "name": "DevOps Team",
-    "email": "devops@company.com",
-    "url": "https://company.com/devops"
-  },
-  "homepage": "https://docs.company.com/plugins/devops",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/company/devops-plugin.git"
-  },
-  "license": "Apache-2.0",
-  "keywords": [
-    "devops",
-    "ci-cd",
-    "automation",
-    "kubernetes",
-    "docker",
-    "deployment"
-  ],
-  "commands": ["./commands", "./admin-commands"],
-  "agents": "./specialized-agents",
-  "hooks": "./config/hooks.json",
-  "mcpServers": "./.mcp.json"
-}
-```
-
-### Component Reference
-
-#### Commands Reference
-
-**Frontmatter поля:**
-
-| Поле | Тип | Обязательное | Значения |
-|------|-----|-------------|----------|
-| `description` | string | ✅ | Любая строка |
-| `allowed-tools` | array/string | ❌ | ["Bash", "Read", "Write", ...] |
-| `argument-hint` | string | ❌ | "[arg1] [arg2] [--option]" |
-| `model` | string | ❌ | "sonnet", "opus", "haiku", "inherit" |
-| `disable-model-invocation` | boolean | ❌ | true, false |
-
-**Special variables:**
-- `$1`, `$2`, ... - Позиционные аргументы
-- `$ARGUMENTS` - Все аргументы
-- `@path/to/file` - Содержимое файла
-- `!`command`` - Bash execution
-- `${CLAUDE_PLUGIN_ROOT}` - Путь к плагину
-
-**Allowed tools values:**
-- `Bash` - Все bash команды
-- `Bash(git:*)` - Git команды только
-- `Bash(git:commit, git:push)` - Конкретные команды
-- `Read` - Чтение файлов
-- `Write` - Запись файлов
-- `Edit` - Редактирование файлов
-- `Grep` - Поиск в файлах
-- `Glob` - Поиск файлов
-- `AskUserQuestion` - Интерактивные вопросы
-
-#### Agents Reference
-
-**Frontmatter поля:**
-
-| Поле | Тип | Обязательное | Значения |
-|------|-----|-------------|----------|
-| `name` | string | ✅ | kebab-case, 3-50 символов |
-| `description` | string | ✅ | С `<example>` блоками |
-| `model` | string | ✅ | "inherit", "sonnet", "opus", "haiku" |
-| `color` | string | ✅ | "blue", "cyan", "green", "yellow", "magenta", "red" |
-| `tools` | array | ❌ | ["Read", "Bash", ...] |
-
-**Description формат:**
-```yaml
-description: Use this agent when... Examples:
-
-<example>
-Context: [Ситуация]
-user: "[Запрос]"
-assistant: "[Ответ]"
-<commentary>
-[Почему триггер]
-</commentary>
-</example>
-```
-
-#### Skills Reference
-
-**Frontmatter поля:**
-
-| Поле | Тип | Обязательное | Значения |
-|------|-----|-------------|----------|
-| `name` | string | ✅ | kebab-case |
-| `description` | string | ✅ | С trigger phrases |
-| `model` | string | ✅ | "sonnet", "haiku" |
-| `version` | string | ❌ | Semantic versioning |
-
-**Description формат:**
-- Third-person: "This skill should be used when..."
-- Concrete phrases: "asks to 'create a hook'"
-- Specific triggers: exact user queries
-
-#### Hooks Reference
-
-**Hook события:**
-- `PreToolUse` - Перед инструментом
-- `PostToolUse` - После инструмента
-- `Stop` - Перед завершением
-- `SubagentStop` - После агента
-- `SessionStart` - Начало сессии
-- `SessionEnd` - Конец сессии
-- `UserPromptSubmit` - Отправка запроса
-- `PreCompact` - Перед сжатием
-- `Notification` - Уведомления
-
-**Hook input fields:**
-```json
-{
-  "session_id": "uuid",
-  "transcript_path": "/path",
-  "cwd": "/current/dir",
-  "permission_mode": "ask|allow",
-  "hook_event_name": "EventName"
-}
-```
-
-**Hook output format:**
-```json
-{
-  "continue": true,
-  "suppressOutput": false,
-  "systemMessage": "Status message"
-}
-```
-
-#### MCP Servers Reference
-
-**MCP server types:**
-- `stdio` - Локальный процесс
-- `http` - REST API
-- `sse` - Server-Sent Events
-- `websocket` - WebSocket
-
-**.mcp.json format:**
-```json
-{
-  "mcpServers": {
-    "server-name": {
-      "type": "stdio|http|sse|websocket",
-      "command": "node",
-      "args": ["server.js"],
-      "url": "http://localhost:8888/mcp",
-      "env": {
-        "API_KEY": "${API_KEY}"
-      }
-    }
-  }
-}
-```
-
-### Path Resolution
-
-**Относительные пути:**
-```json
-{
-  "commands": "./commands",           // От plugin.json
-  "agents": "./agents",               // От plugin.json
-  "hooks": "./config/hooks.json"      // От plugin.json
-}
-```
-
-**В компонентах:**
-```bash
-${CLAUDE_PLUGIN_ROOT}/scripts/script.sh  # Абсолютный путь к plugin root
-${CLAUDE_PLUGIN_ROOT}/templates/tmpl.md  # Абсолютный путь к файлам
-```
-
-**Auto-discovery paths:**
-```
-plugin-name/
-├── commands/*.md           # Автоматически обнаруживаются
-├── agents/*.md             # Автоматически обнаруживаются
-├── skills/*/SKILL.md       # Автоматически обнаруживаются
-└── hooks/hooks.json        # Явная ссылка в plugin.json
-```
-
-### Plugin Lifecycle
-
-**1. Discovery:**
-- Сканирование `.claude-plugin/plugin.json`
-- Чтение manifest
-- Определение компонентов
-
-**2. Initialization:**
-- Загрузка component metadata
-- Регистрация commands
-- Настройка hooks
-- Подключение MCP servers
-
-**3. Execution:**
-- Command invocation
-- Agent triggering
-- Skill loading
-- Hook execution
-
-**4. Cleanup:**
-- SessionEnd hooks
-- MCP server disconnect
-- Resource cleanup
-
-### Plugin Capabilities
-
-**Что МОЖут плагины:**
-- ✅ Добавлять пользовательские команды
-- ✅ Создавать автономных агентов
-- ✅ Предоставлять специализированные знания
-- ✅ Реагировать на события
-- ✅ Интегрировать внешние сервисы
-- ✅ Модифицировать поведение Claude
-- ✅ Валидировать операции
-- ✅ Логировать действия
-
-**Что НЕ МОГУТ плагины:**
-- ❌ Изменять core Claude поведение
-- ❌ Получать доступ к другим сессиям
-- ❌ Модифицировать системные файлы без разрешения
-- ❌ Обходить permission mode
-- ❌ Получать доступ к credential storage
-
-### Plugin Limitations
-
-**Ограничения:**
-- Максимум 100 команд на плагин
-- Максимум 50 агентов на плагин
-- Максимум 20 skills на плагин
-- Hook execution timeout: 5s
-- MCP server startup timeout: 10s
-- Maximum plugin size: 10MB
-
-**Performance:**
-- Skills load on-demand
-- Agents trigger proactively
-- Hooks execute synchronously
-- Commands execute immediately
 
 ---
 
@@ -1621,33 +902,16 @@ plugin-name/
 
 ### File Organization
 
-**Минимальный плагин:**
+**Структура плагина:**
 ```
-minimal-plugin/
-├── .claude-plugin/plugin.json
-└── README.md
-```
-
-**Стандартный плагин:**
-```
-standard-plugin/
-├── .claude-plugin/plugin.json
-├── commands/
-├── skills/
-└── README.md
-```
-
-**Полнофункциональный плагин:**
-```
-full-plugin/
-├── .claude-plugin/plugin.json
-├── commands/
-├── agents/
-├── skills/
-├── hooks/
-├── scripts/
-├── .mcp.json
-└── README.md
+my-plugin/
+├── .claude-plugin/plugin.json  # Обязательный
+├── README.md                    # Обязательный
+├── commands/                    # Опционально
+├── agents/                      # Опционально
+├── skills/                      # Опционально
+├── hooks/                       # Опционально
+└── scripts/                     # Опционально
 ```
 
 ### Testing Strategy
@@ -1655,18 +919,7 @@ full-plugin/
 ```bash
 # Локальное тестирование
 cc --plugin-dir /path/to/plugin
-
-# Или symbolic link
-ln -s /path/to/plugin ~/.claude/plugins/plugin-name
 ```
-
-**Checklist:**
-- [ ] Plugin загружается без ошибок
-- [ ] Команды работают
-- [ ] Skills загружаются
-- [ ] Agents вызываются
-- [ ] Hooks срабатывают
-- [ ] MCP подключается
 
 ---
 
@@ -1676,310 +929,18 @@ ln -s /path/to/plugin ~/.claude/plugins/plugin-name
 
 **Назначение:** Переменная окружения с путём к корню плагина
 
-**Где использовать:**
-- Bash команды в commands
-- Hook scripts
-- File references
-- MCP configurations
-
-**Примеры:**
+**Использование:**
 ```bash
-# В command
 !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/init.sh`
-
-# В hook
 "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate.sh"
-
-# В MCP
-"args": ["${CLAUDE_PLUGIN_ROOT}/server.js"]
 ```
 
 ### Progressive Disclosure
 
-**Three-level system:**
-
-```
-Level 1: Metadata (всегда загружен)
-  ├─ name
-  ├─ description с trigger phrases
-  └─ version
-
-Level 2: SKILL.md (при триггере)
-  ├─ 1,500-2,000 слов essentials
-  ├─ Imperative form
-  └─ Ссылки на references
-
-Level 3: References/Examples (по требованию)
-  ├─ references/patterns.md
-  ├─ examples/workflow.md
-  └─ scripts/utils.sh
-```
-
-### Error Handling
-
-**В bash скриптах:**
-```bash
-#!/bin/bash
-set -e  # Exit on error
-
-# Проверка зависимостей
-if ! command -v jq &> /dev/null; then
-    echo "❌ jq is required but not installed"
-    exit 1
-fi
-
-# Понятные сообщения
-echo "✅ Bank initialized successfully"
-echo "⚠️  Server unavailable"
-echo "❌ Failed to connect"
-```
-
----
-
-## 📤 Стили вывода (Output Styles)
-
-### Основные принципы
-
-**Хороший вывод должен быть:**
-- ✅ **Ясным** - пользователю сразу понятно что произошло
-- ✅ **Структурированным** - информация организована логически
-- ✅ **Консистентным** - одинаковый стиль во всём плагине
-- ✅ **Информативным** - достаточно деталей, но не перегружен
-- ✅ **Действенным** - пользователь знает что делать дальше
-
-### Как писать Output Format для агентов
-
-**Структура секции Output Format:**
-
-```markdown
-## Output Format:
-Provide results as:
-- **Category 1**: Что включать
-- **Category 2**: Что включать
-- **Category 3**: Что включать
-
-For each item, include:
-- File and line number (if applicable)
-- Severity or priority
-- Actionable recommendation
-```
-
-**Категории должны быть:**
-- **Mutually exclusive** - элемент попадает только в одну категорию
-- **Hierarchical** - от критического к информативному
-- **Actionable** - каждая категория предполагает действие
-
-**Примеры категорий для разных типов агентов:**
-
-| Тип агента | Категории |
-|------------|-----------|
-| Code reviewer | Critical, Important, Suggestions, Strengths |
-| Security scanner | Critical, High, Medium, Low, Info |
-| Performance analyzer | Bottlenecks, Warnings, Optimizations, Good |
-| Documentation | Missing, Outdated, Complete, Excellent |
-
-### Как настраивать вывод команд
-
-**Базовая структура вывода команды:**
-
-```markdown
-## [Command Name] Results
-
-### Summary
-[Одна строка с emoji и статусом]
-
-### Details
-[Структурированная информация]
-
-### Next Steps
-[Конкретные действия]
-```
-
-**Настройка через frontmatter:**
-
-```markdown
----
-description: Brief description for /help
-model: sonnet                    # Модель влияет на стиль вывода
-disable-model-invocation: false  # false = Claude форматирует вывод
----
-
-# Инструкции для Claude
-
-Provide results in the following format:
-1. Start with summary
-2. Group findings by category
-3. Include actionable next steps
-```
-
-### Конфигурация emoji и символов
-
-**Стандартные индикаторы статуса:**
-
-| Emoji | Когда использовать | Консистентность |
-|-------|-------------------|-----------------|
-| ✅ | Успех, завершение | Во всех плагинах |
-| ❌ | Ошибка, failure | Во всех плагинах |
-| ⚠️ | Предупреждение | Во всех плагинах |
-| 📝 | Информация, создание | Опционально |
-| 🔍 | Анализ, поиск | Опционально |
-| 🚀 | Деплой, запуск | Опционально |
-
-**Правила использования:**
-- 1-2 emoji на блок информации
-- Всегда в начале строки для сканируемости
-- Одинаковые emoji для одних и тех операций
-- Не злоупотребляйте (не более 20% строк)
-
-### Форматирование структурированных данных
-
-**Для списков с статусом:**
-```markdown
-✓ Item one completed
-✓ Item two completed
-✗ Item three failed
-⚠ Item four warning
-```
-
-**Для таблиц:**
-```markdown
-| Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
-| Data     | 1,234    | ✅       |
-```
-
-- Выравнивайте колонки визуально
-- Числа по правому краю
-- Статус по центру или левому краю
-
-### Настройка progress индикаторов
-
-**Для одношаговых операций:**
-```markdown
-📊 Processing...
-✓ Found 1,234 items
-✓ Processed 1,234 items
-⏱️ Completed in 2.3s
-```
-
-**Для многошаговых операций:**
-```markdown
-[1/3] Step one...    ✅
-[2/3] Step two...    ⏳
-[3/3] Step three...  ⏸️
-```
-
-**Когда показывать progress:**
-- Операции дольше 1 секунды
-- Многошаговые процессы
-- Пакетная обработка файлов
-
-### Настройка сообщений об ошибках
-
-**Обязательные элементы:**
-1. **Чёткое описание** - что именно пошло не так
-2. **Почему важно** - влияние на операцию
-3. **Как исправить** - конкретные шаги
-4. **Технические детали** (опционально) - для debugging
-
-**Структура:**
-```markdown
-❌ **[Error Name]: [Brief Description]**
-
-**What happened:**
-[Specific error description]
-
-**Why it matters:**
-[Impact on operation]
-
-**How to fix:**
-1. [Step one]
-2. [Step two]
-3. [Step three]
-
-**Technical details:** (опционально)
-- Error code: XXX
-- Location: file:line
-```
-
-### Настройка success сообщений
-
-**Обязательные элементы:**
-1. **Что сделано** - конкретные действия
-2. **Результат** - что получено
-3. **Next steps** - что делать дальше
-
-**Структура:**
-```markdown
-✅ **[Operation] Completed Successfully!**
-
-**What was done:**
-- [Action 1]
-- [Action 2]
-- [Action 3]
-
-**Result:**
-[Summary of outcome]
-
-**Next steps:**
-1. [Action one]
-2. [Action two]
-```
-
-### Вывод для хуков
-
-**JSON формат с systemMessage:**
-
-```json
-{
-  "hookSpecificOutput": {
-    "permissionDecision": "allow|deny|ask"
-  },
-  "systemMessage": "✅ Status message here"
-}
-```
-
-**Настройка systemMessage:**
-- Начинайте с emoji статуса
-- Будьте краткими (одна строка)
-- Информативными
-
-**PreToolUse output:**
-```json
-{
-  "hookSpecificOutput": {
-    "permissionDecision": "allow",
-    "updatedInput": {}
-  },
-  "systemMessage": "✅ Validated: safe operation"
-}
-```
-
-**Stop hook output:**
-```json
-{
-  "decision": "approve|block",
-  "reason": "Explanation",
-  "systemMessage": "✅ All checks passed"
-}
-```
-
-### Best Practices
-
-**✅ Do:**
-- Используйте emoji в начале строк
-- Выравнивайте колонки в таблицах
-- Форматируйте числа (1,234,567)
-- Показывайте progress для долгих операций
-- Подтверждайте успешные операции
-- Давайте конкретные next steps
-
-**❌ Don't:**
-- Злоупотребляйте emoji (>20% строк)
-- Делайте строки >80 chars в таблицах
-- Смешивайте форматы чисел
-- Оставляйте без next steps
-- Показывайте technical details без необходимости
+**Трехуровневая система для Skills:**
+- **Level 1:** Metadata (name, description, version)
+- **Level 2:** SKILL.md (1,500-2,000 слов essentials)
+- **Level 3:** References/Examples (по требованию)
 
 ---
 
@@ -1987,57 +948,26 @@ Provide results in the following format:
 
 ### Локальная разработка
 
-**1. Структура:**
-```
-~/.claude/plugins/my-plugin/
-├── .claude-plugin/plugin.json
-├── commands/
-└── README.md
-```
-
-**2. Тестирование:**
 ```bash
 # Запуск с локальным плагином
 cc --plugin-dir /path/to/my-plugin
-
-# Или symbolic link
-ln -s /path/to/my-plugin ~/.claude/plugins/my-plugin
 ```
 
-**3. Итерации:**
-- Изменения в плагине
-- Перезапуск Claude Code
-- Проверка функциональности
+**Итерации:** Изменения → Перезапуск Claude Code → Проверка
 
 ### Валидация
 
-**Hooks validation:**
 ```bash
+# Hooks validation
 ./validate-hook-schema.sh hooks/hooks.json
-```
 
-**Validation checklist:**
-- JSON syntax валиден
-- Обязательные поля присутствуют
-- Event names корректны
-- Hook types валидны
-- Timeout в допустимом диапазоне
-- Hardcoded paths отсутствуют
+# JSON syntax
+jq . .claude-plugin/plugin.json
+```
 
 ---
 
 ## 📦 Публикация
-
-### Подготовка репозитория
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-
-git remote add origin https://github.com/user/my-plugin.git
-git push -u origin main
-```
 
 ### Marketplace структура
 
@@ -2051,25 +981,16 @@ username/my-marketplace/
 
 ### Версионирование
 
-**Semantic Versioning:**
-- `MAJOR` - breaking changes
-- `MINOR` - новые features
-- `PATCH` - bug fixes
+**Semantic Versioning:** MAJOR.MINOR.PATCH
+- MAJOR - breaking changes
+- MINOR - новые features
+- PATCH - bug fixes
+
+### Установка
 
 ```bash
-# Обновление версии
-"version": "1.1.0"  # Было 1.0.0
-```
-
-### Установка пользователями
-
-```bash
-# Из GitHub
 /plugin marketplace add username/my-marketplace
 /plugin install my-plugin@username-my-marketplace
-
-# Короткий формат
-/plugin install my-plugin
 ```
 
 ---
@@ -2167,5 +1088,5 @@ username/my-marketplace/
 
 ---
 
-_Последнее обновление: 2026-01-19_
-_Версия документации: 2.0_
+_Последнее обновление: 2026-01-26_
+_Версия документации: 2.1_
