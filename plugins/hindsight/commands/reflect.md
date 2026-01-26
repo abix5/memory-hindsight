@@ -9,7 +9,7 @@ argument-hint: "<question> [--budget <low|mid|high>]"
 Bank ID: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh`
 
 Analysis:
-!`set -f && BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh) && hindsight memory reflect "$BANK_ID" "$ARGUMENTS" 2>&1`
+!`set -f && BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh) && hindsight memory reflect "$BANK_ID" "$ARGUMENTS" -o yaml 2>&1`
 
 ---
 

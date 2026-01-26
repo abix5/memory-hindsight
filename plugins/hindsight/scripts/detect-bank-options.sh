@@ -44,7 +44,7 @@ echo "=== Existing Banks ==="
 
 # List existing banks if Hindsight is available
 if timeout 3 hindsight bank list &>/dev/null; then
-  BANKS=$(timeout 3 hindsight bank list 2>/dev/null)
+  BANKS=$(timeout 3 hindsight bank list -o yaml 2>/dev/null)
   if [ -n "$BANKS" ]; then
     echo "$BANKS"
   else

@@ -31,7 +31,7 @@ if ! timeout 3 hindsight bank list &>/dev/null; then
 fi
 
 # Check if bank exists and has data
-STATS=$(timeout 3 hindsight bank stats "$BANK_ID" 2>/dev/null)
+STATS=$(timeout 3 hindsight bank stats "$BANK_ID" -o yaml 2>/dev/null)
 
 if [ $? -ne 0 ] || [ -z "$STATS" ]; then
   echo '{"systemMessage": "\ud83c\udd95 Memory bank not initialized. Run /hindsight:init to set up."}'
@@ -45,7 +45,7 @@ if [ -z "$TOTAL_NODES" ] || [ "$TOTAL_NODES" = "0" ]; then
   echo '{"systemMessage": "\ud83c\udd95 Memory bank empty. Decisions will be saved as you work."}'
 else
   # Load key context with reflect (budget: low for speed)
-  CONTEXT=$(timeout 5 hindsight memory reflect "$BANK_ID" "Summarize key architectural decisions, technology choices, and important context for this project in 2-3 sentences" --budget low 2>/dev/null | head -c 1500)
+  CONTEXT=$(timeout 5 hindsight memory reflect "$BANK_ID" "Summarize key architectural decisions, technology choices, and important context for this project in 2-3 sentences" --budget low -o yaml 2>/dev/null | head -c 1500)
 
   if [ -n "$CONTEXT" ]; then
     # Escape for JSON

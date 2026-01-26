@@ -73,7 +73,7 @@ if ! timeout 2 hindsight bank list &>/dev/null; then
 fi
 
 # Perform quick recall (budget: low, max-tokens: 500 for speed)
-RESULT=$(timeout 3 hindsight memory recall "$BANK_ID" "$USER_PROMPT" --budget low --max-tokens 500 2>/dev/null)
+RESULT=$(timeout 3 hindsight memory recall "$BANK_ID" "$USER_PROMPT" --budget low --max-tokens 500 -o yaml 2>/dev/null)
 
 # Check if we got meaningful results
 if [ -z "$RESULT" ]; then

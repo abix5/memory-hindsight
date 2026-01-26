@@ -9,7 +9,7 @@ argument-hint: "<content> [--context <category>]"
 Bank ID: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh`
 
 Result:
-!`set -f && BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh) && hindsight memory retain "$BANK_ID" "$ARGUMENTS" 2>&1`
+!`set -f && BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh) && hindsight memory retain "$BANK_ID" "$ARGUMENTS" -o yaml 2>&1`
 
 ---
 

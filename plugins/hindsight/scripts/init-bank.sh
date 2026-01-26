@@ -64,16 +64,16 @@ echo "✅ Hindsight server is accessible"
 # Check if bank exists
 echo ""
 echo "🔍 Checking if bank exists..."
-if hindsight bank list 2>/dev/null | grep -q "^$BANK_ID"; then
+if hindsight bank list -o yaml 2>/dev/null | grep -q "^$BANK_ID"; then
   echo "✅ Bank '$BANK_ID' already exists"
 else
   echo "📦 Creating bank '$BANK_ID'..."
-  if ! hindsight bank name "$BANK_ID" "$(basename "$PWD")" 2>&1; then
+  if ! hindsight bank name "$BANK_ID" "$(basename "$PWD")" -o yaml 2>&1; then
     echo "❌ Failed to create bank"
     exit 1
   fi
 
-  if ! hindsight bank background "$BANK_ID" "Memory bank for $(basename "$PWD") project development decisions and architecture choices" 2>&1; then
+  if ! hindsight bank background "$BANK_ID" "Memory bank for $(basename "$PWD") project development decisions and architecture choices" -o yaml 2>&1; then
     echo "⚠️  Bank created but failed to set background"
   fi
 

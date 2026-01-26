@@ -41,7 +41,7 @@ if timeout 2 hindsight bank list &>/dev/null; then
 
   # 5. Bank stats
   if [ -n "$BANK_ID" ]; then
-    STATS=$(timeout 3 hindsight bank stats "$BANK_ID" 2>/dev/null)
+    STATS=$(timeout 3 hindsight bank stats "$BANK_ID" -o yaml 2>/dev/null)
     if [ -n "$STATS" ]; then
       echo "  Bank stats:"
       echo "$STATS" | sed 's/^/    /'

@@ -151,7 +151,7 @@ When storing memories:
 Before storing, check if similar information already exists:
 
 ```bash
-EXISTING=$(hindsight memory recall "$BANK_ID" "<brief description>" --budget low --max-tokens 200)
+EXISTING=$(hindsight memory recall "$BANK_ID" "<brief description>" --budget low --max-tokens 200 -o yaml)
 ```
 
 If highly similar content exists, either skip or update with new context.
@@ -159,7 +159,7 @@ If highly similar content exists, either skip or update with new context.
 ## Store Memory
 
 ```bash
-hindsight memory retain "$BANK_ID" "<content>" --context <category>
+hindsight memory retain "$BANK_ID" "<content>" --context <category> -o yaml
 ```
 
 ## Output Format

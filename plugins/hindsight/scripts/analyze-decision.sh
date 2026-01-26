@@ -136,7 +136,7 @@ if [ "$DEFINITE_SAVE" = true ]; then
   fi
 
   # Check for duplicates (quick recall)
-  EXISTING=$(timeout 2 hindsight memory recall "$BANK_ID" "$CONTENT" --budget low --max-tokens 200 2>/dev/null)
+  EXISTING=$(timeout 2 hindsight memory recall "$BANK_ID" "$CONTENT" --budget low --max-tokens 200 -o yaml 2>/dev/null)
   LOWER_EXISTING=$(echo "$EXISTING" | tr '[:upper:]' '[:lower:]')
 
   # Skip if very similar entry exists
