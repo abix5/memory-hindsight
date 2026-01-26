@@ -2,7 +2,7 @@
 # Session start hook: load project context from Hindsight memory bank
 # - Checks Hindsight availability
 # - Loads project context if bank has data
-# - Shows appropriate status message
+# - Provides instructions for AI to use memory proactively
 
 set -f  # disable globbing
 
@@ -42,7 +42,7 @@ fi
 TOTAL_NODES=$(echo "$STATS" | grep -oE '[0-9]+' | head -1)
 
 if [ -z "$TOTAL_NODES" ] || [ "$TOTAL_NODES" = "0" ]; then
-  echo '{"systemMessage": "\ud83c\udd95 Memory bank empty. Decisions will be saved as you work."}'
+  echo '{"systemMessage": "\ud83c\udd95 Memory bank empty. INSTRUCTION: Save important decisions during this session using /hindsight:retain."}'
 else
   # Load key context with reflect (budget: low for speed)
   CONTEXT=$(timeout 5 hindsight memory reflect "$BANK_ID" "Summarize key architectural decisions, technology choices, and important context for this project in 2-3 sentences" --budget low -o yaml 2>/dev/null | head -c 1500)
@@ -50,8 +50,8 @@ else
   if [ -n "$CONTEXT" ]; then
     # Escape for JSON
     ESCAPED=$(echo "$CONTEXT" | tr '\n' ' ' | sed 's/"/\\"/g' | head -c 1000)
-    echo "{\"systemMessage\": \"\ud83d\udcda Project context loaded ($TOTAL_NODES memories). Key context: $ESCAPED\"}"
+    echo "{\"systemMessage\": \"\ud83d\udcda Memory bank active ($TOTAL_NODES entries). Context: $ESCAPED. INSTRUCTION: Use this context when answering. Check memory before making decisions (/hindsight:recall). Save new decisions with /hindsight:retain.\"}"
   else
-    echo "{\"systemMessage\": \"\ud83d\udcda Project memory bank has $TOTAL_NODES entries. Context available via /hindsight:recall.\"}"
+    echo "{\"systemMessage\": \"\ud83d\udcda Memory bank active ($TOTAL_NODES entries). INSTRUCTION: Check memory before making decisions (/hindsight:recall). Save important decisions with /hindsight:retain.\"}"
   fi
 fi

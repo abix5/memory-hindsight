@@ -1,13 +1,13 @@
 ---
 name: memory-keeper
-description: Specialist for identifying and storing important development decisions in Hindsight memory bank. Use proactively when architectural decisions are made, technology choices are discussed, complex bugs are solved, or important tradeoffs are considered. Stores decisions with proper context and categorization.
+description: Specialist for identifying and storing important development decisions in Hindsight memory bank. Use this agent PROACTIVELY without being asked when you observe any of these triggers in the conversation. This agent should be used when architectural decisions are made, technology choices are discussed, complex bugs are solved, tradeoffs are considered, conventions are established, or user says "remember", "важно", "запомни", "from now on", "let's use", "we decided", "the reason is", "the solution was".
 
 <example>
 Context: User made an architectural decision during discussion
 user: "Let's use event-driven architecture for notifications - it will scale better"
 assistant: "Good choice. Let me save this architectural decision to memory."
 <commentary>
-Architectural decision triggers proactive storage via memory-keeper agent
+Phrase "Let's use X because Y" triggers proactive storage via memory-keeper agent
 </commentary>
 </example>
 
@@ -25,7 +25,7 @@ Context: Complex bug was just solved after debugging
 user: "Found it! The memory leak was from unclosed WebSocket connections"
 assistant: "That's a valuable bug fix - I should save this solution to memory."
 <commentary>
-Bug solution triggers proactive storage suggestion
+Bug solution with "Found it!" or similar triggers proactive storage
 </commentary>
 </example>
 
@@ -43,7 +43,7 @@ Context: Convention or pattern decision for the project
 user: "From now on, all API responses should follow the envelope pattern with {data, error, meta}"
 assistant: "I'll save this convention to memory so it's consistently applied."
 <commentary>
-Project-wide convention established triggers storage
+Phrase "From now on" triggers immediate storage of convention
 </commentary>
 </example>
 
@@ -61,7 +61,25 @@ Context: User explicitly asks to remember something
 user: "Remember that the staging API is on port 3001 and uses the test database"
 assistant: "I'll save this environment configuration to memory."
 <commentary>
-Explicit "remember" request triggers immediate storage
+Explicit "remember" request triggers immediate storage - highest priority trigger
+</commentary>
+</example>
+
+<example>
+Context: User explains reasoning behind implementation
+user: "The reason we use a separate service for auth is to allow horizontal scaling"
+assistant: "I'll save this architectural reasoning to memory for future reference."
+<commentary>
+Phrase "The reason is/was" indicates important context worth storing
+</commentary>
+</example>
+
+<example>
+Context: After writing significant code, Claude should check if decision should be saved
+user: "Great, the new caching layer is working"
+assistant: "Now that the caching implementation is complete, let me save this decision to memory for future reference."
+<commentary>
+After completing implementation of significant feature, proactively save the decision
 </commentary>
 </example>
 

@@ -90,23 +90,48 @@ After gathering answers, scan the project to seed initial context:
    - Build/test setup
    - Container/deployment setup (if present)
 
-### Phase 5: Confirmation
+### Phase 5: Update CLAUDE.md
+
+Add Hindsight instructions to CLAUDE.md so the AI assistant knows to use memory bank automatically:
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/update-claude-md.sh "<chosen_bank_id>"
+```
+
+This script is **idempotent**:
+- If CLAUDE.md doesn't exist - creates it with Hindsight block
+- If CLAUDE.md exists without Hindsight block - appends the block
+- If Hindsight block exists with same bank_id - no changes
+- If Hindsight block exists with different bank_id - updates it
+
+The block contains **mandatory instructions** for the AI to:
+- Check memory before making decisions
+- Save architectural decisions automatically
+- Save bug solutions and technology choices
+- React to "remember" requests from user
+
+Report to user what was done with CLAUDE.md.
+
+### Phase 6: Confirmation
 
 Report to the user:
 1. Bank ID and connection status
 2. What was scanned and stored (brief list)
-3. How auto-workflow works:
+3. CLAUDE.md status (created/updated/unchanged)
+4. How auto-workflow works:
    - Session start: loads context automatically
    - During prompts: relevant memories surface as context
    - On infrastructure changes: auto-saves decisions
-4. Control commands:
+   - **AI follows instructions in CLAUDE.md to proactively use memory**
+5. Control commands:
    - /hindsight:pause - pause auto-features
    - /hindsight:status - check current status
    - "!" prefix on prompt - skip recall for one prompt
-5. How to store more decisions manually with /hindsight:retain
+6. How to store more decisions manually with /hindsight:retain
 
 **Important:**
 - Don't store obvious/trivial information
 - Focus on decisions that have "why" behind them
 - Keep initial seed concise (3-7 entries max)
 - If auto-detect was chosen, infer project description from files
+- CLAUDE.md instructions ensure AI uses memory proactively across sessions

@@ -1,12 +1,43 @@
 ---
 name: memory-workflow
-description: Guides when and how to use Hindsight memory bank for storing and retrieving development decisions. Use proactively when making architectural decisions, choosing technologies, solving complex bugs, discussing tradeoffs, or when decisions should be remembered across sessions. Triggers on 'retain', 'recall', 'reflect', 'memory bank', 'past decisions', 'what did we decide', 'store this decision'.
+description: This skill should be used when the user asks to "store decision", "save to memory", "remember this", "recall past decisions", "what did we decide", "check memory", or mentions "hindsight", "memory bank", "retain", "recall", "reflect". Also use proactively when architectural decisions are made, technologies are chosen, bugs are solved, or tradeoffs are discussed.
 model: sonnet
 ---
 
 # Hindsight Memory Workflow
 
 Guide for effectively using Hindsight memory bank during development sessions.
+
+## CRITICAL: Automatic Behavior
+
+As an AI assistant, you MUST use Hindsight memory proactively:
+
+### Always Check Memory BEFORE:
+- Making architectural recommendations
+- Suggesting technology choices
+- Proposing design patterns
+- Answering "how should we..." questions
+
+```bash
+/hindsight:recall "relevant topic"
+```
+
+### Always SAVE to Memory AFTER:
+- User makes a decision with reasoning ("Let's use X because Y")
+- Bug is solved ("Found it! The problem was...")
+- Tradeoff is discussed ("We're sacrificing X for Y")
+- Convention is established ("From now on...")
+- User says "remember", "запомни", "важно"
+
+```bash
+/hindsight:retain "Decision with WHY explanation" --context <category>
+```
+
+### Trigger Phrases (SAVE immediately when you hear):
+- "Let's use...", "We decided...", "The reason is..."
+- "Remember that...", "From now on...", "Important:..."
+- "The solution was...", "We chose X over Y..."
+- "Запомни", "Важно", "Решили что..."
 
 ## When to Access Memory
 
