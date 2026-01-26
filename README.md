@@ -1,171 +1,77 @@
 # Hindsight Plugin for Claude Code
 
-> Интеграция [Hindsight](https://github.com/vectorize-io/hindsight) memory bank с Claude Code для хранения и извлечения решений разработки между сессиями.
+Memory bank integration for storing and retrieving development decisions across sessions.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Описание
+## Requirements
 
-Этот плагин позволяет Claude Code сохранять и вспоминать важные архитектурные решения, технологические выборы, решения багов и другие важные моменты разработки проекта через Hindsight memory bank.
+- Claude Code >= 1.0.33
+- Hindsight server ([Docker setup](./examples/))
+- `hindsight` CLI (plugin uses CLI, not MCP server):
+  ```bash
+  curl -fsSL https://hindsight.vectorize.io/get-cli | bash
+  ```
 
-### Основные возможности
-
-- 💾 **Persistent Memory** - Сохранение архитектурных решений, технологических выборов, багов
-- 🔍 **Smart Recall** - Поиск прошлых решений с семантическим пониманием
-- 🤖 **AI Reflection** - Получение анализа и рекомендаций на основе сохранённого контекста
-- ⚡ **Direct CLI Integration** - Команды напрямую выполняют `hindsight` CLI через bash
-- 🎯 **Per-Project Banks** - Каждый проект использует свой собственный банк памяти
-
-## Установка
-
-### Требования
-
-- Claude Code ≥ 1.0.33
-- Hindsight server (локально в Docker)
-- `hindsight` CLI установлен
-
-### Установка CLI
+## Installation
 
 ```bash
-cargo install hindsight-cli
-# или скачать из releases
-```
+# Add marketplace
+/plugin marketplace add abix5/memory-hindsight
 
-### Установка плагина
-
-#### Из GitHub (рекомендуется)
-
-```bash
-# Добавить marketplace
-/plugin marketplace add dmitriynenashev/hindsight-marketplace
-
-# Установить плагин
+# Install plugin
 /plugin install hindsight
 ```
 
-#### Локальная разработка
+## Quick Start
 
 ```bash
-# Добавить локальный marketplace
-/plugin marketplace add /Users/dmitriynenashev/Projects/hindsight-marketplace
-
-# Установить плагин
-/plugin install hindsight
-```
-
-## Быстрый старт
-
-### 1. Инициализация проекта
-
-```bash
+# Initialize memory bank for project
 /hindsight:init
+
+# Save a decision
+/hindsight:retain "Chose PostgreSQL for ACID transactions" --context tech-stack
+
+# Search memories
+/hindsight:recall database architecture
+
+# AI analysis
+/hindsight:reflect Should we add caching?
 ```
 
-Это создаст:
-- `.claude/hindsight.json` - конфигурация (git-ignored)
-- `.claude/hindsight-guide.md` - инструкции для команды (git-committed)
+## Commands
 
-### 2. Сохранение решений
+| Command | Description |
+|---------|-------------|
+| `/hindsight:init` | Initialize memory bank |
+| `/hindsight:retain` | Save decision to memory |
+| `/hindsight:recall` | Search memories |
+| `/hindsight:reflect` | AI analysis based on memory |
+| `/hindsight:status` | Check memory bank status |
+| `/hindsight:pause` | Pause auto-workflow |
+| `/hindsight:resume` | Resume auto-workflow |
+
+## Server Setup
+
+See [examples/](./examples/) for Docker Compose configuration:
 
 ```bash
-/hindsight:retain "We chose PostgreSQL over MongoDB because we need ACID transactions" --context tech-stack
+cd examples
+cp .env.example .env
+# Edit .env with your LLM API key
+docker-compose up -d
 ```
 
-### 3. Поиск решений
+## Documentation
 
-```bash
-/hindsight:recall database decisions
-```
+- [Plugin Usage Guide](./plugins/hindsight/USAGE.md)
+- [Plugin Development Guide](./CLAUDE.md)
 
-### 4. AI анализ
+## Links
 
-```bash
-/hindsight:reflect Should we add caching given our architecture?
-```
-
-## Документация
-
-- **[CLAUDE.md](./CLAUDE.md)** - База знаний для разработки плагинов (для contributors)
-- **[plugins/hindsight/README.md](./plugins/hindsight/README.md)** - Описание плагина
-- **[plugins/hindsight/USAGE.md](./plugins/hindsight/USAGE.md)** - Подробное руководство пользователя
-
-## Структура репозитория
-
-```
-hindsight-marketplace/
-├── .claude-plugin/
-│   └── marketplace.json              # Описание marketplace
-├── plugins/
-│   └── hindsight/                    # Плагин
-│       ├── commands/                 # Slash-команды (/hindsight:*)
-│       ├── scripts/                  # Bash скрипты
-│       ├── agents/                   # Специализированные агенты
-│       ├── skills/                   # Навыки для Claude
-│       ├── hooks/                    # Event hooks
-│       └── templates/                # Шаблоны файлов
-├── CLAUDE.md                         # База знаний разработки
-├── README.md                         # Этот файл
-└── .gitignore
-```
-
-## Разработка
-
-### Локальная настройка
-
-1. Клонировать репозиторий:
-   ```bash
-   git clone https://github.com/dmitriynenashev/hindsight-marketplace.git
-   cd hindsight-marketplace
-   ```
-
-2. Установить для разработки:
-   ```bash
-   /plugin marketplace add $(pwd)
-   /plugin install hindsight
-   ```
-
-3. Внести изменения в `plugins/hindsight/`
-
-4. Перезапустить Claude Code для применения изменений
-
-### Архитектура плагина
-
-- **Команды** - Используют bash execution для прямого вызова `hindsight` CLI
-- **Скрипты** - Парсят конфиг, инициализируют банк памяти
-- **Агенты** - Автоматически идентифицируют важные решения для сохранения
-- **Skills** - Предоставляют контекст когда использовать память
-- **Hooks** - Напоминают сохранить решения перед завершением сессии
-
-Подробнее см. [CLAUDE.md](./CLAUDE.md)
-
-## Contributing
-
-Contributions welcome! См. [CLAUDE.md](./CLAUDE.md) для базы знаний о разработке плагинов.
-
-### Процесс
-
-1. Fork репозитория
-2. Создать feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit изменения (`git commit -m 'Add amazing feature'`)
-4. Push в branch (`git push origin feature/amazing-feature`)
-5. Открыть Pull Request
+- [Hindsight](https://github.com/vectorize-io/hindsight) - Memory bank system
+- [Claude Code](https://claude.com/claude-code) - AI development environment
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details
-
-## Acknowledgments
-
-- [Hindsight](https://github.com/vectorize-io/hindsight) - Memory bank system
-- [Claude Code](https://claude.com/claude-code) - AI-powered development environment
-- Anthropic - За создание Claude Code plugin system
-
-## Support
-
-- 📝 [Issues](https://github.com/dmitriynenashev/hindsight-marketplace/issues)
-- 📖 [Documentation](./CLAUDE.md)
-- 💬 [Discussions](https://github.com/dmitriynenashev/hindsight-marketplace/discussions)
-
----
-
-Made with ❤️ by [Dmitriy Nenashev](https://github.com/dmitriynenashev)
+MIT

@@ -1,0 +1,79 @@
+services:
+  # Hindsight Memory Engine
+  hindsight:
+    image: ghcr.io/vectorize-io/hindsight:0.3.0
+    container_name: hindsight
+    restart: unless-stopped
+    ports:
+      - "8888:8888" # API & MCP
+      - "9090:9999" # UI
+    environment:
+      # --- LLM ---
+      - HINDSIGHT_API_LLM_PROVIDER=${HINDSIGHT_API_LLM_PROVIDER}
+      - HINDSIGHT_API_LLM_BASE_URL=${HINDSIGHT_API_LLM_BASE_URL}
+      - HINDSIGHT_API_LLM_API_KEY=${HINDSIGHT_API_LLM_API_KEY}
+      - HINDSIGHT_API_LLM_MODEL=${HINDSIGHT_API_LLM_MODEL}
+      - HINDSIGHT_API_LLM_MAX_CONCURRENT=${HINDSIGHT_API_LLM_MAX_CONCURRENT:-8}
+      - HINDSIGHT_API_LLM_TIMEOUT=${HINDSIGHT_API_LLM_TIMEOUT:-180}
+
+      # --- Embeddings (local) ---
+      - HINDSIGHT_API_EMBEDDINGS_PROVIDER=local
+      - HINDSIGHT_API_EMBEDDINGS_LOCAL_MODEL=BAAI/bge-m3
+
+      # --- Reranker (local) ---
+      - HINDSIGHT_API_RERANKER_PROVIDER=local
+      - HINDSIGHT_API_RERANKER_LOCAL_MODEL=cross-encoder/mmarco-mMiniLMv2-L12-H384-v1
+      - HINDSIGHT_API_RERANKER_LOCAL_MAX_CONCURRENT=4
+
+      # --- Database ---
+      - HINDSIGHT_API_DATABASE_URL=postgresql://hindsight:secure_password@postgres:5432/hindsight_db
+      - HINDSIGHT_API_STORE_TYPE=postgres
+      - HINDSIGHT_API_DB_POOL_MIN_SIZE=5
+      - HINDSIGHT_API_DB_POOL_MAX_SIZE=50
+
+      # --- Retrieval & Pipeline ---
+      - HINDSIGHT_API_GRAPH_RETRIEVER=link_expansion
+      - HINDSIGHT_API_RERANKER_MAX_CANDIDATES=300
+      - HINDSIGHT_API_RETAIN_MAX_COMPLETION_TOKENS=64000
+      - HINDSIGHT_API_RETAIN_CHUNK_SIZE=3000
+      - HINDSIGHT_API_RETAIN_EXTRACTION_MODE=concise
+
+      # --- Server ---
+      - HINDSIGHT_API_LOG_LEVEL=info
+      - HINDSIGHT_API_MCP_ENABLED=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hindsight-net
+
+  # PostgreSQL with pgvector
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: hindsight-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: hindsight
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: hindsight_db
+    command: >
+      postgres -c "shared_preload_libraries=vector"
+    shm_size: 1g
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hindsight -d hindsight_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hindsight-net
+
+volumes:
+  postgres-data:
+
+networks:
+  hindsight-net:
+    driver: bridge
