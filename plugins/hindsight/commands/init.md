@@ -1,6 +1,6 @@
 ---
 description: Initialize Hindsight memory bank for the current project
-allowed-tools: ["Bash", "Read", "Write", "Glob", "Grep", "AskUserQuestion"]
+allowed-tools: ["Bash", "Read", "Write", "Glob", "Grep", "AskUserQuestion", "Task"]
 argument-hint: "[bank_id]"
 ---
 
@@ -62,33 +62,78 @@ Options (multiSelect: true):
 - Business rules (domain logic, constraints)
 - Performance considerations (optimization, scaling)
 
-### Phase 4: Project Scan
+### Phase 4: Deep Project Analysis
 
-After gathering answers, scan the project to seed initial context:
+**IMPORTANT:** This is the most critical phase. You must thoroughly explore the codebase to create meaningful memories. Use Task tool with Explore agent for comprehensive analysis.
 
-1. **Check for key infrastructure files** and store findings:
-   - package.json / Cargo.toml / go.mod / pyproject.toml (tech stack)
-   - Dockerfile / docker-compose (containerization)
-   - CI/CD configs (.github/workflows, etc.)
-   - tsconfig.json / vite.config / webpack.config (build setup)
+#### 4.1 Analysis Checklist
 
-2. **Identify project structure**:
-   - Main entry points
-   - Key directories and their purpose
-   - Testing framework in use
+Launch Explore agent to investigate each area. For each finding, immediately store to memory with full context.
 
-3. **Store initial memories** using:
-   ```bash
-   BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh)
-   hindsight memory retain "$BANK_ID" "<finding>" --context <category>
-   ```
+**Architecture (target: 3-5 memories):**
+- Overall architecture pattern (MVC, Clean, Hexagonal, Microservices, Monolith)
+- Core modules/packages and their responsibilities
+- Entry points and main request/data flows
+- Component communication patterns (events, direct calls, queues)
+- Data flow: where data enters, transforms, persists
 
-   Store 3-7 key facts about the project (don't overwhelm):
-   - Primary language and framework
-   - Key dependencies and their purpose
-   - Project structure overview
-   - Build/test setup
-   - Container/deployment setup (if present)
+**Technology Stack (target: 3-5 memories):**
+- Primary language version and why
+- Framework choice and configuration specifics
+- Key dependencies: purpose and integration approach
+- Build toolchain: bundler, compiler, transpiler setup
+- Database type, ORM/query approach, schema patterns
+
+**Patterns & Conventions (target: 2-4 memories):**
+- Code organization (feature folders, layer-based, etc.)
+- Naming conventions for files, classes, functions
+- Error handling strategy
+- API design patterns (REST structure, versioning)
+- Testing approach (unit/integration/e2e split)
+
+**Infrastructure (target: 2-3 memories):**
+- Deployment strategy (containers, serverless, VMs)
+- CI/CD pipeline stages and triggers
+- Environment configuration approach
+- Monitoring/logging patterns
+
+#### 4.2 Quality Standards for Memories
+
+Each memory entry MUST include:
+- **WHAT**: specific component, decision, or pattern
+- **WHY**: reasoning, alternatives considered, tradeoffs
+- **CONTEXT**: how it relates to other parts, when it applies
+
+**Examples of GOOD memories:**
+
+1. "Architecture: Hexagonal architecture with ports/adapters pattern. Domain logic in src/domain/ isolated from infrastructure. Adapters in src/adapters/{db,http,queue}. Chosen to enable testing without infrastructure and future flexibility to swap implementations."
+
+2. "Database: PostgreSQL 15 with Prisma ORM. Schema in prisma/schema.prisma uses soft deletes (deletedAt) on all entities. JSONB for flexible metadata on User and Product. Chose Prisma over TypeORM for type-safety and migrations DX."
+
+3. "API Pattern: REST with /api/v1 prefix. Request validation via Zod schemas in src/schemas/. Responses follow envelope pattern {data, error, meta}. Pagination uses cursor-based approach with ?cursor=id for infinite scroll support."
+
+**Examples of BAD memories (avoid these):**
+- "Uses TypeScript" (no context)
+- "Has tests" (too vague)
+- "PostgreSQL database" (no why or how)
+
+#### 4.3 Adaptive Quantity
+
+- **Full project:** aim for 10-20 memories (minimum 10)
+- **Small/new project:** fewer is OK if genuinely nothing else to document
+- **Empty/boilerplate project:** 1-3 foundational memories are acceptable
+
+The goal is QUALITY over QUANTITY. Each memory should be valuable for future context. If you can only find 5 meaningful things, store 5. Don't pad with trivial facts.
+
+#### 4.4 Store Memories
+
+Use this command for each finding:
+```bash
+BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh)
+hindsight memory retain "$BANK_ID" "<detailed finding with WHAT + WHY + CONTEXT>" --context <category> -o yaml
+```
+
+Categories: `architecture`, `tech-stack`, `patterns`, `conventions`, `decisions`
 
 ### Phase 5: Update CLAUDE.md
 
@@ -130,8 +175,10 @@ Report to the user:
 6. How to store more decisions manually with /hindsight:retain
 
 **Important:**
-- Don't store obvious/trivial information
-- Focus on decisions that have "why" behind them
-- Keep initial seed concise (3-7 entries max)
+- Each memory MUST include WHAT + WHY + CONTEXT
+- Focus on decisions and patterns, not just facts
+- Minimum 10 detailed memories for established projects
+- Fewer is OK for new/small projects (quality over padding)
 - If auto-detect was chosen, infer project description from files
 - CLAUDE.md instructions ensure AI uses memory proactively across sessions
+- Run `/hindsight:rescan` later to add more findings or update outdated ones

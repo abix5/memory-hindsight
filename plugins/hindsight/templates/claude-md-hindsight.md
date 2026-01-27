@@ -69,4 +69,48 @@ Save to memory when you hear:
 - "The solution was..."
 - "We chose X over Y..."
 
+### Automatic Save Triggers (MANDATORY)
+
+You MUST save to memory when you:
+
+1. **Add a new dependency** → Save WHY it was chosen over alternatives
+   ```
+   /hindsight:retain "Added lodash for utility functions - chose over ramda for smaller bundle size and familiar API" --context tech-stack
+   ```
+
+2. **Change infrastructure** (Docker, CI/CD, K8s) → Save the reasoning
+   ```
+   /hindsight:retain "Added Redis service to docker-compose for session caching - chose Redis over Memcached for pub/sub support needed for real-time notifications" --context architecture
+   ```
+
+3. **Make architectural decision** → Save pattern and tradeoffs
+   ```
+   /hindsight:retain "Implemented event-driven communication between services via RabbitMQ - decouples services and handles load spikes better than direct HTTP calls" --context architecture
+   ```
+
+4. **Solve a complex bug** → Save problem and solution
+   ```
+   /hindsight:retain "Memory leak in WebSocket handler - fixed by ensuring connections are closed in finally block, not just on success path" --context bugs
+   ```
+
+5. **Establish a convention** → Save the rule and reasoning
+   ```
+   /hindsight:retain "API responses follow envelope pattern {data, error, meta} - consistent structure for frontend error handling and pagination" --context conventions
+   ```
+
+### Quality Format
+
+Each saved memory MUST include:
+- **WHAT**: specific component, decision, or pattern
+- **WHY**: reasoning, alternatives considered, tradeoffs
+- **CONTEXT**: how it relates to other parts
+
+**BAD (avoid):** "Added Redis" / "Fixed bug" / "Updated config"
+**GOOD:** Include the reasoning and context as shown in examples above
+
+### Maintenance
+
+- `/hindsight:rescan` - Re-analyze project, add new findings, update outdated entries
+- `/hindsight:status` - Check memory bank connection and stats
+
 <!-- HINDSIGHT-MEMORY-BANK-END -->

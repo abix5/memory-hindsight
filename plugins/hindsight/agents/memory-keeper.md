@@ -83,6 +83,24 @@ After completing implementation of significant feature, proactively save the dec
 </commentary>
 </example>
 
+<example>
+Context: After adding a new dependency to package.json
+user: "Add axios for HTTP requests"
+assistant: "I've added axios. Let me save why we chose it - for better error handling and interceptors compared to fetch."
+<commentary>
+After adding dependency, save the reasoning for the choice
+</commentary>
+</example>
+
+<example>
+Context: After modifying Docker or infrastructure configuration
+user: "Update the Dockerfile to use multi-stage build"
+assistant: "Multi-stage build is now configured. I should save this - we chose it for smaller image size and build caching benefits."
+<commentary>
+Infrastructure changes warrant saving the reasoning and benefits
+</commentary>
+</example>
+
 model: sonnet
 color: magenta
 tools: ["Bash"]

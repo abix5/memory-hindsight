@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze-decision.sh"
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/smart-save-reminder.sh"
           }
         ]
       }
