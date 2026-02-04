@@ -174,7 +174,7 @@ When storing memories:
 Before storing, check if similar information already exists:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-recall.sh low 200 <<'EOF'
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-recall.sh low 200 <<'EOF'
 <brief description of what you want to store>
 EOF
 ```
@@ -184,7 +184,7 @@ If highly similar content exists, either skip or update with new context.
 ## Store Memory
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-retain.sh <category> <<'EOF'
 <content with WHAT + WHY>
 EOF
 ```

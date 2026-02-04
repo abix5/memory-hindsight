@@ -10,7 +10,7 @@ version: 0.1.0
 Get AI-powered analysis with one command. Pick the budget, write question, execute:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-reflect.sh <BUDGET> <<'EOF'
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-reflect.sh <BUDGET> <<'EOF'
 <QUESTION>
 EOF
 ```

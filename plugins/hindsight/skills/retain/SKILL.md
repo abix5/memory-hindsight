@@ -10,7 +10,7 @@ version: 0.1.0
 Save information with one command. Pick the category, format content, execute:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <CATEGORY> <<'EOF'
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-retain.sh <CATEGORY> <<'EOF'
 <CONTENT>
 EOF
 ```
@@ -48,7 +48,7 @@ Report to user: what was stored, category, keywords for future recall.
 Before storing, optionally check if similar exists:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-recall.sh low 200 <<'EOF'
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-recall.sh low 200 <<'EOF'
 <brief topic>
 EOF
 ```

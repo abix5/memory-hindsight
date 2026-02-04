@@ -37,7 +37,7 @@ Options should be the detected names (deduplicated), plus any existing banks tha
 After the user chooses a bank name, run:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/init-bank.sh "<chosen_bank_id>"
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/init-bank.sh "<chosen_bank_id>"
 ```
 
 If initialization **failed**, explain the error and suggest fixes. Stop here.
@@ -129,7 +129,7 @@ The goal is QUALITY over QUANTITY. Each memory should be valuable for future con
 
 Use this command for each finding:
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-retain.sh <category> <<'EOF'
 <detailed finding with WHAT + WHY + CONTEXT>
 EOF
 ```
@@ -141,7 +141,7 @@ Categories: `architecture`, `tech-stack`, `patterns`, `conventions`, `decisions`
 Add Hindsight instructions to CLAUDE.md so the AI assistant knows to use memory bank automatically:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/update-claude-md.sh "<chosen_bank_id>"
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/update-claude-md.sh "<chosen_bank_id>"
 ```
 
 This script is **idempotent**:

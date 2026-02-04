@@ -56,7 +56,7 @@ For each finding:
 
 1. **Check if similar exists** in memory:
    ```bash
-   bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-recall.sh low 200 <<'EOF'
+   bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-recall.sh low 200 <<'EOF'
    <brief topic>
    EOF
    ```
@@ -68,7 +68,7 @@ For each finding:
 
 3. **Store new/updated findings:**
    ```bash
-   bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'
+   bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-retain.sh <category> <<'EOF'
    <finding with WHAT + WHY + CONTEXT>
    EOF
    ```

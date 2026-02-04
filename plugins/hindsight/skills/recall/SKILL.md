@@ -10,7 +10,7 @@ version: 0.1.0
 Search memory with one command. Pick the budget, write query, execute:
 
 ```bash
-bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-recall.sh <BUDGET> <<'EOF'
+bash !`echo ${CLAUDE_PLUGIN_ROOT}`/scripts/do-recall.sh <BUDGET> <<'EOF'
 <QUERY>
 EOF
 ```
