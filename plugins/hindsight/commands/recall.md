@@ -1,34 +1,13 @@
 ---
 description: Search for information in Hindsight memory bank
 allowed-tools: ["Bash"]
-argument-hint: "<query> [--budget <low|mid|high>]"
+argument-hint: [query]
 ---
 
-## Search Memory
+The user wants to search memory for:
 
-Bank ID: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh`
+$ARGUMENTS
 
-Results:
-!`set -f && BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh) && hindsight memory recall "$BANK_ID" "$ARGUMENTS" -o yaml 2>&1`
+Follow the recall skill instructions: determine budget, execute via do-recall.sh with heredoc.
 
----
-
-## Instructions
-
-Analyze the search results and present them clearly:
-
-1. **Summarize findings**: Key information matching the query
-2. **Extract details**: Important decisions, reasoning, context
-3. **Show connections**: If multiple related memories, highlight patterns
-4. **Provide context**: How this relates to current work
-
-**Budget levels:**
-- `low` - Quick lookup, recent/obvious info
-- `mid` - Balanced search (default)
-- `high` - Comprehensive, thorough analysis
-
-If no results found, suggest:
-- Try different keywords
-- Use broader or narrower query
-- Check if information was stored with different context
-- Consider using `/hindsight:reflect` for analysis-based answers
+Present findings clearly: summarize, extract details, show connections.

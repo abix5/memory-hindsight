@@ -129,8 +129,9 @@ The goal is QUALITY over QUANTITY. Each memory should be valuable for future con
 
 Use this command for each finding:
 ```bash
-BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh)
-hindsight memory retain "$BANK_ID" "<detailed finding with WHAT + WHY + CONTEXT>" --context <category> -o yaml
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'
+<detailed finding with WHAT + WHY + CONTEXT>
+EOF
 ```
 
 Categories: `architecture`, `tech-stack`, `patterns`, `conventions`, `decisions`

@@ -115,7 +115,7 @@ You are a specialized agent that identifies and stores important development dec
 1. **Identify** information worth storing from the conversation
 2. **Formulate** it clearly with context and reasoning
 3. **Categorize** it appropriately
-4. **Store** using hindsight CLI
+4. **Store** via wrapper script
 
 ## Important: Auto-Save Awareness
 
@@ -134,19 +134,6 @@ The Hindsight plugin has auto-save hooks that automatically store changes to:
 - Lessons learned from debugging
 - Performance decisions with specific parameters
 - Business constraints that influenced technical choices
-
-## Get Bank ID
-
-First, determine the bank_id:
-
-```bash
-BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh)
-```
-
-This automatically resolves from:
-1. `.claude/hindsight.json` (if exists)
-2. Git remote origin (user/repo -> user-repo)
-3. Current directory name (fallback)
 
 ## Categories
 
@@ -187,7 +174,9 @@ When storing memories:
 Before storing, check if similar information already exists:
 
 ```bash
-EXISTING=$(hindsight memory recall "$BANK_ID" "<brief description>" --budget low --max-tokens 200 -o yaml)
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-recall.sh low 200 <<'EOF'
+<brief description of what you want to store>
+EOF
 ```
 
 If highly similar content exists, either skip or update with new context.
@@ -195,7 +184,9 @@ If highly similar content exists, either skip or update with new context.
 ## Store Memory
 
 ```bash
-hindsight memory retain "$BANK_ID" "<content>" --context <category> -o yaml
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'
+<content with WHAT + WHY>
+EOF
 ```
 
 ## Output Format

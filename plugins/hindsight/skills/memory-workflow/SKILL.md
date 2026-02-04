@@ -18,26 +18,21 @@ As an AI assistant, you MUST use Hindsight memory proactively:
 - Proposing design patterns
 - Answering "how should we..." questions
 
-```bash
-/hindsight:recall "relevant topic"
-```
+Use the **recall skill** to search memory.
 
 ### Always SAVE to Memory AFTER:
 - User makes a decision with reasoning ("Let's use X because Y")
 - Bug is solved ("Found it! The problem was...")
 - Tradeoff is discussed ("We're sacrificing X for Y")
 - Convention is established ("From now on...")
-- User says "remember", "запомни", "важно"
+- User says "remember", "important"
 
-```bash
-/hindsight:retain "Decision with WHY explanation" --context <category>
-```
+Use the **retain skill** to store to memory.
 
 ### Trigger Phrases (SAVE immediately when you hear):
 - "Let's use...", "We decided...", "The reason is..."
 - "Remember that...", "From now on...", "Important:..."
 - "The solution was...", "We chose X over Y..."
-- "Запомни", "Важно", "Решили что..."
 
 ## When to Access Memory
 
@@ -163,39 +158,10 @@ Use reflection when:
 3. **Cross-reference with current context**
    - Memory might be outdated; verify relevance
 
-## Plugin Commands
+## Action Skills
 
-```bash
-# Initialize memory bank for project
-/hindsight:init [bank_id]
+For execution details, the following action skills handle all CLI interactions:
 
-# Store memory (bank_id auto-detected)
-/hindsight:retain "<content>" --context <category>
-
-# Search memory
-/hindsight:recall "<query>" --budget <low|mid|high>
-
-# Get AI analysis
-/hindsight:reflect "<question>" --budget <low|mid|high>
-```
-
-## Bank ID Resolution
-
-The plugin automatically determines bank_id:
-
-1. From `.claude/hindsight.json` (if exists)
-2. From git remote origin (user/repo → user-repo)
-3. From current directory name (fallback)
-
-You don't need to specify bank_id manually - it's handled automatically.
-
-## Reference Documentation
-
-For complete CLI command reference with all options and examples, see:
-- `references/cli-commands.md` - Complete hindsight CLI reference
-
-**Important CLI Notes:**
-- Banks auto-create when you use `name` or `background` commands
-- Budget levels: `low` (quick), `mid` (default, balanced), `high` (thorough)
-- All commands support `--output json` for programmatic use
-- Use `--verbose` flag for debugging API calls
+- **retain skill** — saves content to memory bank (handles bank_id, CLI flags, heredoc)
+- **recall skill** — searches memory bank (handles bank_id, budget, max-tokens)
+- **reflect skill** — gets AI analysis from memory bank (handles bank_id, budget, max-tokens)

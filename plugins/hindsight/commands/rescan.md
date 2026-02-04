@@ -9,7 +9,9 @@ argument-hint: "[--deep]"
 Bank ID: !`bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh`
 
 Current memory summary:
-!`BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh) && hindsight memory reflect "$BANK_ID" "List all key facts known about this project in categories: architecture, tech-stack, patterns, conventions" --budget medium -o yaml 2>&1 | head -100`
+!`bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-reflect.sh mid 4096 <<'EOF'
+List all key facts known about this project in categories: architecture, tech-stack, patterns, conventions
+EOF`
 
 ---
 
@@ -54,8 +56,9 @@ For each finding:
 
 1. **Check if similar exists** in memory:
    ```bash
-   BANK_ID=$(bash ${CLAUDE_PLUGIN_ROOT}/scripts/get-bank-id.sh)
-   hindsight memory recall "$BANK_ID" "<brief topic>" --budget low -o yaml
+   bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-recall.sh low 200 <<'EOF'
+   <brief topic>
+   EOF
    ```
 
 2. **Action based on result:**
@@ -65,7 +68,9 @@ For each finding:
 
 3. **Store new/updated findings:**
    ```bash
-   hindsight memory retain "$BANK_ID" "<finding with WHAT + WHY + CONTEXT>" --context <category> -o yaml
+   bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'
+   <finding with WHAT + WHY + CONTEXT>
+   EOF
    ```
 
 #### Phase 4: Report

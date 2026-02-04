@@ -39,7 +39,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "CRITICAL: Before conversation compaction, you MUST save important decisions to Hindsight memory bank. Review the conversation and identify: 1) Architectural decisions made 2) Technology choices with reasoning 3) Bug solutions found 4) Tradeoffs discussed 5) Lessons learned. For each important item, use: /hindsight:retain \"description with WHY\" --context <category>. Categories: architecture, tech-stack, patterns, decisions, tradeoffs, bugs, lessons. Save 2-5 most important items. Skip if nothing significant was decided."
+            "prompt": "CRITICAL: Before conversation compaction, you MUST save important decisions to Hindsight memory bank. Review the conversation and identify: 1) Architectural decisions made 2) Technology choices with reasoning 3) Bug solutions found 4) Tradeoffs discussed 5) Lessons learned. For each important item, use: bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'\n<content with WHAT + WHY>\nEOF\nCategories: architecture, tech-stack, patterns, decisions, tradeoffs, bugs, lessons. Save 2-5 most important items. Skip if nothing significant was decided."
           }
         ]
       }
