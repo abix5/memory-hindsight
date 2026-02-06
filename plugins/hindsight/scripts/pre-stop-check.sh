@@ -17,12 +17,7 @@ if [ -f "$PAUSE_FILE" ]; then
   exit 0
 fi
 
-# Check Hindsight availability (quick)
-if ! timeout 2 hindsight bank list &>/dev/null; then
-  exit 0
-fi
-
-# Return prompt-like message to remind about saving
+# Return instruction to review and save decisions before ending
 cat << 'EOF'
-{"systemMessage": "🧠 Session ending. If any important decisions were made (architecture, tech choices, bug fixes, tradeoffs), consider saving them with /hindsight:retain before ending."}
+{"systemMessage": "BEFORE ENDING: Review this session for important decisions that should be saved to memory. For each significant decision (architecture, tech-stack, patterns, tradeoffs, bug fixes, lessons learned), save it with /hindsight:retain [WHAT was decided + WHY] --context [category]. Skip if nothing significant was decided."}
 EOF

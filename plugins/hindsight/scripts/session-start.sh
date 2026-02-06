@@ -30,8 +30,8 @@ if ! timeout 3 hindsight bank list &>/dev/null; then
   exit 0
 fi
 
-# Check if bank exists and has data
-STATS=$(timeout 3 hindsight bank stats "$BANK_ID" -o yaml 2>/dev/null)
+# Check if bank exists and has data (fast: ~50ms)
+STATS=$(timeout 2 hindsight bank stats "$BANK_ID" -o yaml 2>/dev/null)
 
 if [ $? -ne 0 ] || [ -z "$STATS" ]; then
   echo '{"systemMessage": "\ud83c\udd95 Memory bank not initialized. Run /hindsight:init to set up."}'
@@ -41,17 +41,10 @@ fi
 # Try to extract node count from stats output
 TOTAL_NODES=$(echo "$STATS" | grep -oE '[0-9]+' | head -1)
 
-if [ -z "$TOTAL_NODES" ] || [ "$TOTAL_NODES" = "0" ]; then
-  echo '{"systemMessage": "\ud83c\udd95 Memory bank empty. INSTRUCTION: Save important decisions during this session using /hindsight:retain."}'
-else
-  # Load key context with reflect (budget: low for speed)
-  CONTEXT=$(timeout 5 hindsight memory reflect "$BANK_ID" "Summarize key architectural decisions, technology choices, and important context for this project in 2-3 sentences" --budget low -o yaml 2>/dev/null | head -c 1500)
+INSTRUCTIONS="MEMORY INSTRUCTIONS: You have access to Hindsight memory bank (bank: $BANK_ID). Use it throughout this session: 1) BEFORE making architectural or technology decisions, check memory with /hindsight:recall [query] to see if there are prior decisions on this topic. 2) AFTER making important decisions (architecture, tech-stack, patterns, tradeoffs, bug fixes), save them with /hindsight:retain [description with WHAT + WHY] --context [category]. Categories: architecture, tech-stack, patterns, decisions, tradeoffs, bugs, lessons. 3) Always include WHY in saved decisions, not just WHAT."
 
-  if [ -n "$CONTEXT" ]; then
-    # Escape for JSON
-    ESCAPED=$(echo "$CONTEXT" | tr '\n' ' ' | sed 's/"/\\"/g' | head -c 1000)
-    echo "{\"systemMessage\": \"\ud83d\udcda Memory bank active ($TOTAL_NODES entries). Context: $ESCAPED. INSTRUCTION: Use this context when answering. Check memory before making decisions (/hindsight:recall). Save new decisions with /hindsight:retain.\"}"
-  else
-    echo "{\"systemMessage\": \"\ud83d\udcda Memory bank active ($TOTAL_NODES entries). INSTRUCTION: Check memory before making decisions (/hindsight:recall). Save important decisions with /hindsight:retain.\"}"
-  fi
+if [ -z "$TOTAL_NODES" ] || [ "$TOTAL_NODES" = "0" ]; then
+  echo "{\"systemMessage\": \"Memory bank '$BANK_ID' is empty. $INSTRUCTIONS\"}"
+else
+  echo "{\"systemMessage\": \"Memory bank '$BANK_ID' active ($TOTAL_NODES entries). $INSTRUCTIONS\"}"
 fi
