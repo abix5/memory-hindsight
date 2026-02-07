@@ -3,114 +3,88 @@
 
 **Bank ID:** `{{BANK_ID}}`
 
-### Automatic Behavior (MANDATORY)
+### How to Save (async, non-blocking)
 
-When working on this project you MUST follow these rules:
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'
+WHAT was decided/discovered + WHY (reasoning, alternatives, tradeoffs)
+EOF
+```
 
-1. **Session Start** - Context is loaded automatically via hook. USE this context when answering questions.
+Saving is **asynchronous** (`--async`) — returns instantly, processes in background. Never wait for confirmation; continue working immediately.
 
-2. **Before Making Decisions** - ALWAYS check memory first:
-   ```
-   /hindsight:recall "relevant query"
-   ```
-   Check if similar decisions were made before. Maintain consistency.
+### Decision Framework: WHEN to Save
 
-3. **After Architectural Decisions** - SAVE with reasoning:
-   ```
-   /hindsight:retain "Decision with WHY explanation" --context architecture
-   ```
+Save to memory **autonomously** whenever ANY of these criteria is met during the conversation:
 
-4. **After Solving Complex Bugs** - SAVE the solution:
-   ```
-   /hindsight:retain "Bug description and solution" --context bugs
-   ```
+1. **Decision with reasoning** — "chose X because Y", "we decided to", "let's use X"
+2. **Solved non-trivial bug** — root cause + fix (not just "fixed typo")
+3. **Pattern/convention established** — "from now on...", "all X should follow Y"
+4. **Constraint or workaround** — "X doesn't work because Y, using Z instead"
+5. **Negative decision** — "we do NOT use X because Y" (what was rejected and why)
+6. **Repeated context** — user explains the same thing a second time (save it so they don't have to again)
+7. **Explicit request** — "remember", "save this", "important", "запомни", "важно"
+8. **Dependency added with reasoning** — why this library over alternatives
+9. **Infrastructure change** — Docker, CI/CD, K8s, DB schema changes with reasoning
+10. **Tradeoff made** — sacrificing X for Y, technical debt accepted consciously
 
-5. **After Technology Choices** - SAVE with justification:
-   ```
-   /hindsight:retain "Chose X over Y because Z" --context tech-stack
-   ```
+**DO NOT save:**
+- Trivial changes without reasoning (formatting, typos, renames)
+- Temporary/experimental decisions marked as such
+- Information obvious from the code itself
+- Duplicates of what's already in memory (check first if unsure)
 
-6. **When User Says "remember"** - IMMEDIATELY save to memory.
+### Decision Framework: WHEN to Search Memory
 
-7. **Before Session Ends** - Review if important decisions should be saved.
+**Search memory BEFORE answering** whenever the prompt involves:
 
-### Commands Reference
+1. **Architecture/design** — "how to implement", "what approach", "how to structure"
+2. **Technology choice** — "which DB", "which framework", "which library"
+3. **Pattern/convention** — "how do we usually", "is there a standard", "what's our approach"
+4. **Past decision** — "why is it this way", "what did we decide", "was there a reason"
+5. **Recurring context** — you're unsure about project-specific context
+6. **Similar bug** — problem with a component that may have been solved before
+7. **Infrastructure** — "how is it configured", Docker/CI/CD/DB questions
 
-| Command | Purpose |
-|---------|---------|
-| `/hindsight:recall "query"` | Search memory for relevant context |
-| `/hindsight:retain "text" --context cat` | Save decision to memory |
-| `/hindsight:reflect "question"` | Get AI analysis based on memory |
-| `/hindsight:status` | Check memory bank status |
+**DO NOT search for:** trivial edits, formatting, confirmations, new code with no dependency on past decisions.
+
+```bash
+bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-recall.sh <budget> <<'EOF'
+search query
+EOF
+```
+
+Budgets: `low` (quick), `mid` (balanced, default), `high` (thorough).
 
 ### Categories
 
-Use appropriate category with `--context`:
-
-- `architecture` - System design, component structure
-- `tech-stack` - Technology and library choices
-- `patterns` - Code patterns, design patterns
-- `decisions` - Key decisions with reasoning
-- `tradeoffs` - Compromises and justification
-- `bugs` - Complex bugs and solutions
-- `lessons` - Insights and learnings
-- `requirements` - Business constraints
-- `conventions` - Code and process standards
-
-### Proactive Triggers
-
-Save to memory when you hear:
-- "Let's use X because..."
-- "We decided to..."
-- "The reason for this is..."
-- "Remember that..."
-- "Important: ..."
-- "From now on..."
-- "The solution was..."
-- "We chose X over Y..."
-
-### Automatic Save Triggers (MANDATORY)
-
-You MUST save to memory when you:
-
-1. **Add a new dependency** → Save WHY it was chosen over alternatives
-   ```
-   /hindsight:retain "Added lodash for utility functions - chose over ramda for smaller bundle size and familiar API" --context tech-stack
-   ```
-
-2. **Change infrastructure** (Docker, CI/CD, K8s) → Save the reasoning
-   ```
-   /hindsight:retain "Added Redis service to docker-compose for session caching - chose Redis over Memcached for pub/sub support needed for real-time notifications" --context architecture
-   ```
-
-3. **Make architectural decision** → Save pattern and tradeoffs
-   ```
-   /hindsight:retain "Implemented event-driven communication between services via RabbitMQ - decouples services and handles load spikes better than direct HTTP calls" --context architecture
-   ```
-
-4. **Solve a complex bug** → Save problem and solution
-   ```
-   /hindsight:retain "Memory leak in WebSocket handler - fixed by ensuring connections are closed in finally block, not just on success path" --context bugs
-   ```
-
-5. **Establish a convention** → Save the rule and reasoning
-   ```
-   /hindsight:retain "API responses follow envelope pattern {data, error, meta} - consistent structure for frontend error handling and pagination" --context conventions
-   ```
+| Category | When to use |
+|----------|------------|
+| `architecture` | System design, components, infrastructure, DB schema |
+| `tech-stack` | Technology/library choices with reasoning |
+| `patterns` | Code patterns, design patterns, implementation approaches |
+| `decisions` | Key decisions with explicit reasoning |
+| `tradeoffs` | Compromises, technical debt, what was sacrificed |
+| `bugs` | Non-trivial bugs: root cause + solution |
+| `lessons` | Insights, gotchas, things that surprised us |
+| `requirements` | Business constraints, performance requirements, SLAs |
+| `conventions` | Standards, naming, processes, team agreements |
 
 ### Quality Format
 
-Each saved memory MUST include:
-- **WHAT**: specific component, decision, or pattern
-- **WHY**: reasoning, alternatives considered, tradeoffs
-- **CONTEXT**: how it relates to other parts
+**BAD:** "Added Redis" / "Fixed bug" / "Updated config"
+**GOOD:** "Chose Redis over Memcached for session caching — need TTL for auto-expiry, pub/sub for cache invalidation across instances, and persistence for restart safety"
 
-**BAD (avoid):** "Added Redis" / "Fixed bug" / "Updated config"
-**GOOD:** Include the reasoning and context as shown in examples above
+Each memory: **WHAT** (specific) + **WHY** (reasoning) + alternatives if discussed.
 
-### Maintenance
+### Commands
 
-- `/hindsight:rescan` - Re-analyze project, add new findings, update outdated entries
-- `/hindsight:status` - Check memory bank connection and stats
+| Command | Purpose |
+|---------|---------|
+| `/hindsight:recall "query"` | Search memory |
+| `/hindsight:retain "text"` | Save to memory |
+| `/hindsight:reflect "question"` | AI analysis from memory |
+| `/hindsight:status` | Bank status and stats |
+| `/hindsight:rescan` | Re-analyze project, find new knowledge |
 
 <!-- HINDSIGHT-MEMORY-BANK-END -->

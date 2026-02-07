@@ -11,13 +11,24 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "BEFORE answering this prompt, evaluate: does it involve architecture, technology choices, design patterns, past decisions, known bugs/constraints, project conventions, or infrastructure? If YES — search Hindsight memory FIRST by running: bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-recall.sh low <<'EOF'\n<relevant search query>\nEOF\nThen use the results to inform your answer. If the prompt is about simple code edits, formatting, confirmations, or trivial tasks — proceed without recall."
+          }
+        ]
+      }
+    ],
     "PreCompact": [
       {
         "matcher": "*",
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "CRITICAL: Before conversation compaction, you MUST save important decisions to Hindsight memory bank. Review the conversation and identify: 1) Architectural decisions made 2) Technology choices with reasoning 3) Bug solutions found 4) Tradeoffs discussed 5) Lessons learned. For each important item, use: bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'\n<content with WHAT + WHY>\nEOF\nCategories: architecture, tech-stack, patterns, decisions, tradeoffs, bugs, lessons. Save 2-5 most important items. Skip if nothing significant was decided."
+            "prompt": "Before compaction, save unsaved important knowledge to Hindsight memory. Review conversation for: 1) Decisions with reasoning 2) Technology choices 3) Bug solutions (root cause + fix) 4) Tradeoffs made 5) Constraints/workarounds discovered 6) Conventions established 7) Negative decisions (what was rejected and why). For each, use: bash ${CLAUDE_PLUGIN_ROOT}/scripts/do-retain.sh <category> <<'EOF'\n<WHAT + WHY>\nEOF\nCategories: architecture, tech-stack, patterns, decisions, tradeoffs, bugs, lessons, requirements, conventions. Retain is async (non-blocking). Save 2-5 items. Skip if nothing significant."
           }
         ]
       }

@@ -41,10 +41,10 @@ fi
 # Try to extract node count from stats output
 TOTAL_NODES=$(echo "$STATS" | grep -oE '[0-9]+' | head -1)
 
-INSTRUCTIONS="MEMORY INSTRUCTIONS: You have access to Hindsight memory bank (bank: $BANK_ID). Use it throughout this session: 1) BEFORE making architectural or technology decisions, check memory with /hindsight:recall [query] to see if there are prior decisions on this topic. 2) AFTER making important decisions (architecture, tech-stack, patterns, tradeoffs, bug fixes), save them with /hindsight:retain [description with WHAT + WHY] --context [category]. Categories: architecture, tech-stack, patterns, decisions, tradeoffs, bugs, lessons. 3) Always include WHY in saved decisions, not just WHAT."
+INSTRUCTIONS="HINDSIGHT MEMORY (bank: $BANK_ID). Retain is ASYNC (non-blocking). SAVE autonomously when: decision+reasoning, solved bug, pattern/convention set, constraint/workaround found, negative decision, user repeats context, explicit request. DO NOT SAVE: trivial changes, temporary experiments, obvious-from-code. BEFORE decisions: recall memory first. Format: WHAT + WHY. Categories: architecture, tech-stack, patterns, decisions, tradeoffs, bugs, lessons, requirements, conventions."
 
 if [ -z "$TOTAL_NODES" ] || [ "$TOTAL_NODES" = "0" ]; then
-  echo "{\"systemMessage\": \"Memory bank '$BANK_ID' is empty. $INSTRUCTIONS\"}"
+  echo "{\"systemMessage\": \"$INSTRUCTIONS Bank is empty - start saving important decisions.\"}"
 else
-  echo "{\"systemMessage\": \"Memory bank '$BANK_ID' active ($TOTAL_NODES entries). $INSTRUCTIONS\"}"
+  echo "{\"systemMessage\": \"$INSTRUCTIONS Bank has $TOTAL_NODES entries.\"}"
 fi

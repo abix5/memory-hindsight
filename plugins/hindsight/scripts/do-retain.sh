@@ -10,4 +10,4 @@ BANK_ID=$(bash "$PLUGIN_ROOT/scripts/get-bank-id.sh" 2>/dev/null)
 CATEGORY="${1:-general}"
 CONTENT=$(cat)
 [ -z "$CONTENT" ] && echo "Error: No content via stdin" >&2 && exit 1
-hindsight memory retain "$BANK_ID" "$CONTENT" --context "$CATEGORY" -o yaml 2>&1
+hindsight memory retain "$BANK_ID" "$CONTENT" --context "$CATEGORY" --async -o yaml 2>&1
